@@ -233,7 +233,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
       <div class="upz-t">Fotografar prato</div>
       <div class="upz-s">A IA estima calorias e macros automaticamente</div>
     </div>
-    <input type="file" id="prato-file" accept="image/*" style="display:none" onchange="handlePratoFile(event)" capture="environment">
+    <input type="file" id="prato-file" accept="image/*" style="display:none" onchange="handlePratoFile(event)">
     <div id="prato-prev-wrap" style="display:none">
       <img id="prato-prev" class="prev-img" alt="Foto do prato">
       <div class="btn-row">
@@ -295,7 +295,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
           <div class="upz-t">Foto da tela da balança</div>
           <div class="upz-s">Mi Fit, Withings, Xiaomi, Omron, Garmin...</div>
         </div>
-        <input type="file" id="bio-file" accept="image/*" style="display:none" onchange="handleBioFile(event)" capture="environment">
+        <input type="file" id="bio-file" accept="image/*" style="display:none" onchange="handleBioFile(event)">
         <div id="bio-prev-wrap" style="display:none">
           <img id="bio-prev" class="prev-img" alt="Foto balança">
           <div class="btn-row"><button class="btn btn-p btn-sm" id="btn-ler-bio" onclick="lerBioIA()" style="flex:1"><i class="ti ti-sparkles"></i> Extrair com IA</button><button class="btn btn-o btn-sm" onclick="limparBioFoto()">Remover</button></div>
