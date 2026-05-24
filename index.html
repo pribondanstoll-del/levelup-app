@@ -175,17 +175,102 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 }
 #print-page { display: none; }
 
+
+/* NOTIFICATIONS */
+.notif-banner{position:fixed;top:0;left:0;right:0;z-index:200;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-family:var(--font-b);transform:translateY(-100%);transition:transform 0.4s cubic-bezier(.34,1.56,.64,1)}
+.notif-banner.show{transform:translateY(0)}
+.notif-banner.alert{background:#1a2e1a;border-bottom:2px solid var(--yellow)}
+.notif-banner.success{background:#0d2a1a;border-bottom:2px solid var(--accent)}
+.notif-banner.warn{background:#2a1a0d;border-bottom:2px solid var(--red)}
+.notif-icon{font-size:20px;flex-shrink:0}
+.notif-msg{flex:1;line-height:1.4;color:var(--text)}
+.notif-close{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:2px 4px;flex-shrink:0}
+.notif-queue-dot{width:8px;height:8px;border-radius:50%;background:var(--yellow);position:absolute;top:10px;right:18px;display:none}
+.notif-queue-dot.show{display:block}
+
+/* INSIGHTS CARD */
+.insight-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;position:relative;overflow:hidden}
+.insight-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent-dim),transparent)}
+.insight-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.insight-item:last-child{border-bottom:none}
+.insight-emoji{font-size:20px;flex-shrink:0;margin-top:1px}
+.insight-text{flex:1}
+.insight-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.insight-sub{font-size:11px;color:var(--text3);line-height:1.4}
+.insight-type-ok{border-left:3px solid var(--accent);padding-left:8px;border-radius:2px}
+.insight-type-warn{border-left:3px solid var(--yellow);padding-left:8px;border-radius:2px}
+.insight-type-bad{border-left:3px solid var(--red);padding-left:8px;border-radius:2px}
+
+
+.notif-banner{position:fixed;top:0;left:0;right:0;z-index:200;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;transform:translateY(-100%);transition:transform 0.4s ease}
+.notif-banner.show{transform:translateY(0)}
+.notif-banner.success{background:#0d2a1a;border-bottom:2px solid #2dff8e}
+.notif-banner.warn{background:#2a1f0d;border-bottom:2px solid #ffd060}
+.notif-banner.bad{background:#2a0d0d;border-bottom:2px solid #ff5a5a}
+.notif-icon{font-size:18px;flex-shrink:0}
+.notif-msg{flex:1;color:#e8f5ef;line-height:1.4}
+.notif-close{background:none;border:none;color:#4d7a61;font-size:18px;cursor:pointer;padding:2px 6px}
+.ins-card{background:#162b22;border:1px solid rgba(45,255,142,0.1);border-radius:16px;padding:14px 16px;margin-bottom:12px}
+.ins-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(45,255,142,0.1)}
+.ins-item:last-child{border-bottom:none}
+.ins-emoji{font-size:18px;flex-shrink:0}
+.ins-body{flex:1}
+.ins-title{font-size:13px;font-weight:500;color:#e8f5ef;margin-bottom:2px}
+.ins-sub{font-size:11px;color:#4d7a61;line-height:1.4}
+.ins-ok{border-left:3px solid #2dff8e;padding-left:8px}
+.ins-warn{border-left:3px solid #ffd060;padding-left:8px}
+.ins-bad{border-left:3px solid #ff5a5a;padding-left:8px}
 </style>
 </head>
 <body>
-<div id="app">
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" style="display:none;position:fixed;inset:0;background:#0d1f1a;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px">
+  <div style="font-family:'Syne',sans-serif;font-size:42px;font-weight:800;color:#2dff8e;margin-bottom:8px">LevelUp</div>
+  <div style="font-size:14px;color:#4d7a61;margin-bottom:48px;text-align:center">Seu companheiro de saúde e emagrecimento</div>
+  <button id="btn-google-login" onclick="loginGoogle()" style="display:flex;align-items:center;gap:12px;padding:14px 24px;background:#fff;border:none;border-radius:12px;font-size:15px;font-weight:500;cursor:pointer;width:100%;max-width:300px;justify-content:center;font-family:'DM Sans',sans-serif">
+    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.3 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.4 35.5 26.8 36 24 36c-5.2 0-9.6-2.8-11.9-6.9l-6.5 5C9.5 40.1 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20H24v8h11.3c-.9 2.4-2.5 4.4-4.6 5.8l6.2 5.2C40.9 35.4 44 30.1 44 24c0-1.3-.1-2.7-.4-4z"/></svg>
+    Entrar com Google
+  </button>
+  <div id="login-error" style="margin-top:16px;font-size:13px;color:#ff5a5a;text-align:center"></div>
+  <div style="margin-top:48px;font-size:11px;color:#4d7a61;text-align:center;line-height:1.6">Seus dados ficam salvos na nuvem<br>e sincronizados em todos os dispositivos</div>
+</div>
+
+<div id="app" style="display:none">
 <div class="hdr">
   <div class="hdr-row">
     <div><div class="app-logo">LevelUp</div><div class="hdr-date" id="hdr-date"></div></div>
-    <div style="font-size:26px;color:var(--accent);opacity:.6"><i class="ti ti-flame"></i></div>
+    <div style="display:flex;align-items:center;gap:10px">
+    <div id="user-avatar" style="width:28px;height:28px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--accent);cursor:pointer;overflow:hidden" onclick="showUserMenu()">
+      <i class="ti ti-user"></i>
+    </div>
+    <div style="font-size:24px;color:var(--accent);opacity:.6"><i class="ti ti-flame"></i></div>
+  </div>
+  <div id="user-menu" style="display:none;position:absolute;top:52px;right:18px;background:var(--card2);border:1px solid var(--border);border-radius:var(--rs);padding:8px;z-index:300;min-width:180px">
+    <div id="user-name" style="font-size:12px;color:var(--text3);padding:6px 10px;border-bottom:1px solid var(--border);margin-bottom:6px"></div>
+    <button onclick="logout();document.getElementById('user-menu').style.display='none'" style="width:100%;padding:9px 10px;background:none;border:none;color:var(--red);font-size:13px;font-family:var(--font-b);cursor:pointer;text-align:left;border-radius:var(--r8);display:flex;align-items:center;gap:8px"><i class="ti ti-logout"></i> Sair da conta</button>
+  </div>
   </div>
 </div>
 
+
+<!-- NOTIFICATION BANNER -->
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(13,31,26,0.92);z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:12px">
+  <div style="font-size:28px;animation:spin 1s linear infinite"><i class="ti ti-loader"></i></div>
+  <div style="font-size:14px;color:#8ab89e">Carregando seus dados...</div>
+</div>
+<div id="notif-banner" class="notif-banner">
+  <span class="notif-icon" id="notif-icon"></span>
+  <span class="notif-msg" id="notif-msg"></span>
+  <button class="notif-close" onclick="closeNotif()"><i class="ti ti-x"></i></button>
+</div>
+<div class="notif-queue-dot" id="notif-dot"></div>
+
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(13,31,26,0.92);z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:12px">
+  <div style="font-size:28px;animation:spin 1s linear infinite"><i class="ti ti-loader"></i></div>
+  <div style="font-size:14px;color:#8ab89e">Carregando seus dados...</div>
+</div>
+<div id="notif-banner" class="notif-banner"><span id="notif-icon" class="notif-icon"></span><span id="notif-msg" class="notif-msg"></span><button class="notif-close" onclick="closeNotif()">✕</button></div>
 <div class="content" id="mc">
 
 <!-- ═══ DASHBOARD ═══ -->
@@ -197,6 +282,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
     <div class="met"><div class="ml">Água hoje</div><div class="mv" id="d-agua">—<span class="mu"> ml</span></div></div>
     <div class="met"><div class="ml">Sono</div><div class="mv" id="d-sono">—<span class="mu"> h</span></div></div>
   </div>
+
+  <!-- INSIGHTS -->
+  <div class="insight-card" id="insights-card" style="display:none">
+    <div class="ct">💡 Avisos & conquistas</div>
+    <div id="insights-list"></div>
+  </div>
+
+  <div class="ins-card" id="ins-card" style="display:none"><div class="ct">💡 Avisos &amp; conquistas</div><div id="ins-list"></div></div>
   <div class="card" id="d-prog-card" style="display:none">
     <div class="ct">Progresso até a meta</div>
     <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px"><span id="d-prog-l"></span><span id="d-prog-r"></span></div>
@@ -236,6 +329,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
     <input type="file" id="prato-file" accept="image/*" style="display:none" onchange="handlePratoFile(event)">
     <div id="prato-prev-wrap" style="display:none">
       <img id="prato-prev" class="prev-img" alt="Foto do prato">
+      <div class="fg" style="margin-top:12px">
+        <label>Descreva o prato <span style="font-size:10px;color:var(--text3)">opcional — melhora muito a análise</span></label>
+        <textarea id="prato-descricao" rows="3" style="resize:none" placeholder="Ex: macarrão ao molho branco com bacon, porção grande, sem sal..."></textarea>
+      </div>
       <div class="btn-row">
         <button class="btn btn-p btn-sm" id="btn-analisar" onclick="analisarPrato()" style="flex:1"><i class="ti ti-sparkles"></i> Analisar com IA</button>
         <button class="btn btn-o btn-sm" onclick="limparPrato()">Remover</button>
@@ -552,7 +649,92 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 </nav>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
+// ═══ FIREBASE ════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyD2OTwZ5cYojmf5ZCZxrnV8gBx8doJDR7c",
+  authDomain: "levelup-app-84881.firebaseapp.com",
+  projectId: "levelup-app-84881",
+  storageBucket: "levelup-app-84881.firebasestorage.app",
+  messagingSenderId: "222668218167",
+  appId: "1:222668218167:web:0eb84a68eccc71a32344b2"
+};
+firebase.initializeApp(firebaseConfig);
+var db   = firebase.firestore();
+var auth = firebase.auth();
+var currentUser = null;
+
+auth.onAuthStateChanged(function(user) {
+  if(user) {
+    currentUser = user;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    loadAllFromFirebase();
+  } else {
+    currentUser = null;
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+function loginGoogle() {
+  var provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(function(err) {
+    document.getElementById('login-error').textContent = 'Erro ao entrar: ' + err.message;
+  });
+}
+
+function logout() {
+  auth.signOut();
+}
+
+// ── Firebase read/write helpers ──────────────────────────────────
+function userDoc() {
+  return db.collection('users').doc(currentUser.uid);
+}
+
+async function saveToFirebase(key, data) {
+  if(!currentUser) return;
+  try {
+    await userDoc().collection('data').doc(key).set({value: JSON.stringify(data), updatedAt: new Date()});
+  } catch(e) { console.error('Firebase save error:', e); }
+}
+
+async function loadFromFirebase(key) {
+  if(!currentUser) return null;
+  try {
+    var doc = await userDoc().collection('data').doc(key).get();
+    if(doc.exists) return JSON.parse(doc.data().value);
+  } catch(e) { console.error('Firebase load error:', e); }
+  return null;
+}
+
+async function loadAllFromFirebase() {
+  if(!currentUser) return;
+  showLoadingOverlay(true);
+  try {
+    var keys = ['pesos','bio','exames','pratos','dias','perfil','metas'];
+    for(var i=0; i<keys.length; i++) {
+      var val = await loadFromFirebase(keys[i]);
+      if(val !== null) localStorage.setItem('lu_'+keys[i], JSON.stringify(val));
+    }
+  } catch(e) { console.error('Load error:', e); }
+  showLoadingOverlay(false);
+  init();
+}
+
+function showLoadingOverlay(show) {
+  var el = document.getElementById('loading-overlay');
+  if(el) el.style.display = show ? 'flex' : 'none';
+}
+
+// Override S.save to also save to Firebase
+var _origSave = null;
+
+
 // ═══ STATE ═══════════════════════════════════════════════════════
 const S = {
   get pesos()   { return JSON.parse(localStorage.getItem('lu_pesos')   ||'[]'); },
@@ -730,6 +912,8 @@ function limparPrato() {
   document.getElementById('prato-upz').style.display='block';
   document.getElementById('prato-resultado').style.display='none';
   document.getElementById('prato-ld').style.display='none';
+  var descEl=document.getElementById('prato-descricao');
+  if(descEl) descEl.value='';
 }
 async function analisarPrato() {
   if(!pratoB64) return;
@@ -739,24 +923,19 @@ async function analisarPrato() {
   try {
     const p=S.perfil; const pesos=S.pesos;
     const pesoAtual=pesos.length?pesos[pesos.length-1].peso:'?';
+    var descEl=document.getElementById('prato-descricao');var descricao=descEl?descEl.value.trim():'';
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       model:'claude-sonnet-4-20250514',max_tokens:900,
       messages:[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:'image/jpeg',data:pratoB64}},
-        {type:'text',text:`Esta é uma foto de um prato/refeição. O usuário tem: sexo ${p.sexo||'?'}, ${p.idade||'?'} anos, peso ${pesoAtual}kg, meta de emagrecer até ${p.meta||'?'}kg, restrições: ${p.restricoes||'nenhuma'}.
-
-Analise o prato e responda SOMENTE em JSON sem nada fora:
-{
-  "alimentos": "liste os alimentos identificados separados por vírgula",
-  "calorias": numero estimado de kcal (só número),
-  "proteinas_g": numero em gramas (só número),
-  "carbs_g": numero em gramas (só número),
-  "gorduras_g": numero em gramas (só número),
-  "fibras_g": numero em gramas (só número),
-  "avaliacao": "excelente" | "boa" | "regular" | "ruim",
-  "avaliacao_msg": "mensagem curta e motivadora de 1-2 frases avaliando se essa refeição está alinhada com o objetivo de emagrecimento",
-  "sugestao": "uma sugestão prática e específica para melhorar esse prato ou substituir algum item"
-}`}
+        {type:'text',text:
+          'Esta e uma foto de um prato. '
+          +(descricao?'O usuario descreveu: "'+descricao+'". Use essa descricao como referencia principal para os ingredientes. ':'')
+          +'Usuario: sexo '+(p.sexo||'?')+', '+(p.idade||'?')+' anos, peso '+pesoAtual+'kg, meta '+(p.meta||'?')+'kg, restricoes: '+(p.restricoes||'nenhuma')+'. '
+          +'Analise a refeicao (foto + descricao) e responda SOMENTE em JSON: '
+          +'{"alimentos":"liste todos os alimentos incluindo os descritos","calorias":0,"proteinas_g":0,"carbs_g":0,"gorduras_g":0,"fibras_g":0,'
+          +'"avaliacao":"excelente|boa|regular|ruim","avaliacao_msg":"mensagem motivadora 1-2 frases","sugestao":"sugestao pratica"}'
+        }
       ]}]
     })});
     const data=await res.json();
@@ -1047,6 +1226,284 @@ Responda SOMENTE em JSON:
   finally{document.getElementById('btn-gerar').disabled=false;document.getElementById('plano-ld').style.display='none';}
 }
 
+
+// ═══ NOTIFICATIONS & INSIGHTS ════════════════════════════════════
+let notifQueue = [];
+let notifTimer = null;
+
+function showNotif(msg, type, icon) {
+  notifQueue.push({msg, type, icon});
+  if(notifQueue.length === 1) processNotifQueue();
+  else {
+    document.getElementById('notif-dot').classList.add('show');
+  }
+}
+
+function processNotifQueue() {
+  if(!notifQueue.length) { document.getElementById('notif-dot').classList.remove('show'); return; }
+  const n = notifQueue[0];
+  const banner = document.getElementById('notif-banner');
+  document.getElementById('notif-icon').textContent = n.icon || '';
+  document.getElementById('notif-msg').textContent = n.msg;
+  banner.className = 'notif-banner ' + (n.type||'alert') + ' show';
+  if(notifTimer) clearTimeout(notifTimer);
+  notifTimer = setTimeout(() => { closeNotif(); }, 4000);
+}
+
+
+function showUserMenu() {
+  var menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  if(currentUser) {
+    document.getElementById('user-name').textContent = currentUser.displayName || currentUser.email;
+    var avatar = document.getElementById('user-avatar');
+    if(currentUser.photoURL) {
+      avatar.innerHTML = '<img src="'+currentUser.photoURL+'" style="width:100%;height:100%;object-fit:cover">';
+    }
+  }
+}
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('user-menu');
+  if(menu && !menu.contains(e.target) && !document.getElementById('user-avatar').contains(e.target)) {
+    menu.style.display = 'none';
+  }
+});
+
+function closeNotif() {
+  const banner = document.getElementById('notif-banner');
+  banner.classList.remove('show');
+  notifQueue.shift();
+  setTimeout(() => {
+    if(notifQueue.length) processNotifQueue();
+    else document.getElementById('notif-dot').classList.remove('show');
+  }, 400);
+}
+
+function calcInsights() {
+  const p = S.perfil;
+  const pesos = S.pesos;
+  const dias = S.dias;
+  const td = today();
+  const dh = dias[td] || {};
+  const pratos = S.pratos.filter(function(r){ return r.data === td; });
+  const insights = [];
+
+  // META DE ÁGUA
+  const metaAgua = parseInt(p.agua_meta || 2000);
+  const aguaHoje = dh.agua || 0;
+  const aguaPct = Math.round((aguaHoje / metaAgua) * 100);
+  if(aguaHoje === 0) {
+    insights.push({type:'bad', emoji:'💧', title:'Hidratação zerada hoje!', sub:'Você ainda não registrou água. Meta: '+metaAgua+'ml.'});
+  } else if(aguaPct >= 100) {
+    insights.push({type:'ok', emoji:'💧', title:'Meta de água batida! 🎉', sub:'Você tomou '+aguaHoje+'ml hoje. Parabéns!'});
+  } else if(aguaPct >= 60) {
+    insights.push({type:'warn', emoji:'💧', title:'Quase lá na hidratação!', sub:'Faltam '+(metaAgua-aguaHoje)+'ml para bater a meta de hoje.'});
+  } else {
+    insights.push({type:'warn', emoji:'💧', title:'Hidratação baixa hoje', sub:'Tomou só '+aguaHoje+'ml. Faltam '+(metaAgua-aguaHoje)+'ml — beba um copo agora!'});
+  }
+
+  // PROTEÍNA DO DIA
+  if(pratos.length) {
+    var totalProt = pratos.reduce(function(s,r){ return s + (r.ia&&r.ia.proteinas_g||0); }, 0);
+    var totalCal  = pratos.reduce(function(s,r){ return s + (r.ia&&r.ia.calorias||0); }, 0);
+    var pesoAtual = pesos.length ? pesos[pesos.length-1].peso : null;
+    var metaProt  = pesoAtual ? Math.round(pesoAtual * 1.6) : 80; // 1.6g/kg para emagrecimento
+    var protPct   = Math.round((totalProt / metaProt) * 100);
+    if(protPct >= 100) {
+      insights.push({type:'ok', emoji:'💪', title:'Meta de proteína batida!', sub:'Consumiu '+totalProt+'g hoje. Ótimo para manter músculo!'});
+    } else if(protPct >= 60) {
+      insights.push({type:'warn', emoji:'💪', title:'Proteína: '+protPct+'% da meta', sub:'Consumiu '+totalProt+'g de ~'+metaProt+'g. Faltam '+(metaProt-totalProt)+'g — adicione proteína nas próximas refeições.'});
+    } else {
+      insights.push({type:'bad', emoji:'💪', title:'Proteína baixa hoje', sub:'Só '+totalProt+'g de ~'+metaProt+'g recomendados. Prefira carnes, ovos ou leguminosas.'});
+    }
+    if(totalCal > 0) {
+      var metaCal = 1800; // default
+      if(pesoAtual && p.altura) {
+        var tmb = p.sexo==='masculino'
+          ? 88.36 + (13.4*pesoAtual) + (4.8*(p.altura||170)) - (5.7*(p.idade||35))
+          : 447.6 + (9.2*pesoAtual) + (3.1*(p.altura||165)) - (4.3*(p.idade||35));
+        metaCal = Math.round(tmb * 0.85); // déficit para emagrecer
+      }
+      if(totalCal > metaCal * 1.1) {
+        insights.push({type:'warn', emoji:'🔥', title:'Calorias acima da meta hoje', sub:'Consumiu '+totalCal+'kcal (meta ~'+metaCal+'kcal). Tente uma janta mais leve.'});
+      } else if(totalCal >= metaCal * 0.8) {
+        insights.push({type:'ok', emoji:'🔥', title:'Calorias dentro da meta!', sub:totalCal+'kcal de ~'+metaCal+'kcal. Continua assim!'});
+      }
+    }
+  } else {
+    insights.push({type:'warn', emoji:'🍽️', title:'Nenhuma refeição registrada hoje', sub:'Fotografe seu prato na aba Prato para acompanhar nutrição.'});
+  }
+
+  // SONO
+  if(dh.sono) {
+    if(dh.sono.horas >= 7) {
+      insights.push({type:'ok', emoji:'😴', title:'Sono ótimo ontem!', sub:dh.sono.horas+'h de sono. Descanso adequado acelera o metabolismo.'});
+    } else if(dh.sono.horas >= 5) {
+      insights.push({type:'warn', emoji:'😴', title:'Sono abaixo do ideal', sub:'Dormiu '+dh.sono.horas+'h. O recomendado é 7-9h para emagrecer melhor.'});
+    } else {
+      insights.push({type:'bad', emoji:'😴', title:'Sono muito curto!', sub:'Apenas '+dh.sono.horas+'h. Sono ruim aumenta o cortisol e dificulta o emagrecimento.'});
+    }
+  }
+
+  // TREINO
+  var treinos = dh.treinos || [];
+  var ultimoTreino = null;
+  var diasSemTreino = 0;
+  var diasArr = Object.entries(dias).sort(function(a,b){ return b[0].localeCompare(a[0]); });
+  for(var i=0; i<diasArr.length; i++) {
+    var d = diasArr[i];
+    if(d[0] === td) continue;
+    if(d[1].treinos && d[1].treinos.length) { ultimoTreino = d[0]; break; }
+    diasSemTreino++;
+  }
+  if(treinos.length) {
+    var totalMin = treinos.reduce(function(s,t){ return s+t.duracao; }, 0);
+    insights.push({type:'ok', emoji:'🏃', title:'Treino feito hoje! 💪', sub:treinos.map(function(t){ return t.tipo+' '+t.duracao+'min'; }).join(', ')+'. Total: '+totalMin+'min. Excelente!'});
+  } else if(diasSemTreino >= 3) {
+    insights.push({type:'bad', emoji:'🏃', title:diasSemTreino+' dias sem treino', sub:'Que tal uma caminhada hoje? Mesmo 20 minutos já fazem diferença!'});
+  } else if(diasSemTreino >= 1) {
+    insights.push({type:'warn', emoji:'🏃', title:'Sem treino hoje ainda', sub:'Ultimo treino: '+(ultimoTreino?fmtD(ultimoTreino):'sem registro')+'. Bora se movimentar!'});
+  }
+
+  // PESO — streak e progresso
+  if(pesos.length >= 2) {
+    var ultimo = pesos[pesos.length-1];
+    var penultimo = pesos[pesos.length-2];
+    var diffPeso = (ultimo.peso - penultimo.peso).toFixed(1);
+    if(parseFloat(diffPeso) < 0) {
+      insights.push({type:'ok', emoji:'⚖️', title:'Você perdeu '+Math.abs(diffPeso)+'kg! 🎉', sub:'De '+penultimo.peso+'kg para '+ultimo.peso+'kg. Continue assim!'});
+    } else if(parseFloat(diffPeso) > 0.5) {
+      insights.push({type:'warn', emoji:'⚖️', title:'Peso subiu '+diffPeso+'kg', sub:'Pode ser retenção de líquido ou variação normal. Mantenha a rotina!'});
+    }
+    // dias sem registrar peso
+    var ultimaDataPeso = new Date(ultimo.data+'T12:00:00');
+    var diffDias = Math.floor((new Date() - ultimaDataPeso) / (1000*60*60*24));
+    if(diffDias >= 3) {
+      insights.push({type:'warn', emoji:'📅', title:diffDias+' dias sem registrar peso', sub:'Registre regularmente para acompanhar melhor sua evolução.'});
+    }
+  } else if(!pesos.length) {
+    insights.push({type:'warn', emoji:'⚖️', title:'Ainda sem registro de peso', sub:'Vá em Corpo → Peso e registre seu peso atual para começar!'});
+  }
+
+  // META
+  if(pesos.length && p.meta) {
+    var atual = pesos[pesos.length-1].peso;
+    var meta = parseFloat(p.meta);
+    var falta = (atual - meta).toFixed(1);
+    if(parseFloat(falta) <= 0) {
+      insights.push({type:'ok', emoji:'🏆', title:'META ATINGIDA! Incrível! 🏆', sub:'Você chegou em '+atual+'kg. Parabéns pela dedicação!'});
+    } else if(parseFloat(falta) <= 2) {
+      insights.push({type:'ok', emoji:'🎯', title:'Faltam só '+falta+'kg para a meta!', sub:'Você está quase lá! Continua firme!'});
+    }
+  }
+
+  return insights;
+}
+
+function renderInsights() {
+  const insights = calcInsights();
+  const card = document.getElementById('insights-card');
+  const list = document.getElementById('insights-list');
+  if(!insights.length) { card.style.display='none'; return; }
+  card.style.display = 'block';
+  list.innerHTML = insights.map(function(ins){
+    return '<div class="insight-item insight-type-'+ins.type+'">'
+      +'<div class="insight-emoji">'+ins.emoji+'</div>'
+      +'<div class="insight-text">'
+      +'<div class="insight-title">'+ins.title+'</div>'
+      +'<div class="insight-sub">'+ins.sub+'</div>'
+      +'</div></div>';
+  }).join('');
+
+  // Show banner for most critical insight
+  var bad = insights.filter(function(i){ return i.type==='bad'; });
+  var ok  = insights.filter(function(i){ return i.type==='ok'; });
+  if(bad.length) showNotif(bad[0].title, 'warn', bad[0].emoji);
+  else if(ok.length) showNotif(ok[0].title, 'success', ok[0].emoji);
+}
+
+
+
+var _notifTimer = null;
+function showNotif(msg,type,icon){var b=document.getElementById('notif-banner');document.getElementById('notif-icon').textContent=icon||'';document.getElementById('notif-msg').textContent=msg;b.className='notif-banner '+(type||'warn')+' show';if(_notifTimer)clearTimeout(_notifTimer);_notifTimer=setTimeout(function(){closeNotif();},4500);}
+
+function showUserMenu() {
+  var menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  if(currentUser) {
+    document.getElementById('user-name').textContent = currentUser.displayName || currentUser.email;
+    var avatar = document.getElementById('user-avatar');
+    if(currentUser.photoURL) {
+      avatar.innerHTML = '<img src="'+currentUser.photoURL+'" style="width:100%;height:100%;object-fit:cover">';
+    }
+  }
+}
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('user-menu');
+  if(menu && !menu.contains(e.target) && !document.getElementById('user-avatar').contains(e.target)) {
+    menu.style.display = 'none';
+  }
+});
+
+function closeNotif(){document.getElementById('notif-banner').classList.remove('show');}
+function calcInsights(){
+  var p=S.perfil,pesos=S.pesos,td=today(),dh=S.dias[td]||{},pratos=S.pratos.filter(function(r){return r.data===td;}),ins=[];
+  var metaAgua=parseInt(p.agua_meta||2000),aguaHoje=dh.agua||0,aguaPct=Math.round((aguaHoje/metaAgua)*100);
+  if(aguaHoje===0)ins.push({t:'bad',e:'💧',title:'Hidratação zerada hoje!',sub:'Você ainda não tomou água. Meta: '+metaAgua+'ml.'});
+  else if(aguaPct>=100)ins.push({t:'ok',e:'💧',title:'Meta de água batida! 🎉',sub:'Tomou '+aguaHoje+'ml hoje. Parabéns!'});
+  else ins.push({t:'warn',e:'💧',title:'Hidratação: '+aguaPct+'% da meta',sub:'Faltam '+(metaAgua-aguaHoje)+'ml para os '+metaAgua+'ml de hoje.'});
+  if(pratos.length){
+    var totalProt=pratos.reduce(function(s,r){return s+(r.ia&&r.ia.proteinas_g||0);},0);
+    var totalCal=pratos.reduce(function(s,r){return s+(r.ia&&r.ia.calorias||0);},0);
+    var pesoAtual=pesos.length?pesos[pesos.length-1].peso:70;
+    var metaProt=Math.round(pesoAtual*1.6);
+    var protPct=Math.round((totalProt/metaProt)*100);
+    if(protPct>=100)ins.push({t:'ok',e:'💪',title:'Meta de proteína batida!',sub:'Consumiu '+totalProt+'g hoje. Ótimo para manter músculo!'});
+    else if(totalProt>0)ins.push({t:'warn',e:'💪',title:'Proteína: '+protPct+'% da meta',sub:'Consumiu '+totalProt+'g de ~'+metaProt+'g. Faltam '+(metaProt-totalProt)+'g.'});
+    if(totalCal>0){
+      var tmb=p.sexo==='masculino'?Math.round(88.36+(13.4*pesoAtual)+(4.8*(p.altura||170))-(5.7*(p.idade||35))):Math.round(447.6+(9.2*pesoAtual)+(3.1*(p.altura||165))-(4.3*(p.idade||35)));
+      var metaCal=Math.round(tmb*0.85);
+      if(totalCal>metaCal*1.1)ins.push({t:'warn',e:'🔥',title:'Calorias acima da meta ('+totalCal+'kcal)',sub:'Meta: ~'+metaCal+'kcal. Tente uma refeição mais leve.'});
+      else ins.push({t:'ok',e:'🔥',title:'Calorias dentro da meta! '+totalCal+'kcal',sub:'Meta: ~'+metaCal+'kcal. Continue assim!'});
+    }
+  } else {
+    ins.push({t:'warn',e:'🍽️',title:'Nenhuma refeição registrada hoje',sub:'Fotografe seu prato na aba Prato para acompanhar nutrição.'});
+  }
+  if(dh.sono){
+    if(dh.sono.horas>=7)ins.push({t:'ok',e:'😴',title:'Sono ótimo! '+dh.sono.horas+'h',sub:'Descanso adequado acelera o metabolismo!'});
+    else ins.push({t:'warn',e:'😴',title:'Sono curto: '+dh.sono.horas+'h',sub:'O ideal são 7-9h. Sono ruim dificulta o emagrecimento.'});
+  }
+  var treinos=dh.treinos||[];
+  if(treinos.length){
+    var totalMin=treinos.reduce(function(s,t){return s+t.duracao;},0);
+    ins.push({t:'ok',e:'🏃',title:'Treino feito hoje! 💪',sub:treinos.map(function(t){return t.tipo+' '+t.duracao+'min';}).join(' + ')+' ('+totalMin+'min)'});
+  } else {
+    var diasSem=0,diasArr=Object.keys(S.dias).sort().reverse();
+    for(var i=0;i<diasArr.length;i++){if(diasArr[i]===td)continue;if(S.dias[diasArr[i]].treinos&&S.dias[diasArr[i]].treinos.length)break;diasSem++;}
+    if(diasSem>=3)ins.push({t:'bad',e:'🏃',title:diasSem+' dias sem treino!',sub:'Que tal uma caminhada hoje? 20 minutos já fazem diferença!'});
+    else ins.push({t:'warn',e:'🏃',title:'Sem treino hoje ainda',sub:'Registre seu treino na aba Meu dia.'});
+  }
+  if(pesos.length>=2){
+    var diff=parseFloat((pesos[pesos.length-1].peso-pesos[pesos.length-2].peso).toFixed(1));
+    if(diff<0)ins.push({t:'ok',e:'⚖️',title:'Você perdeu '+Math.abs(diff)+'kg! 🎉',sub:'Continue firme!'});
+    else if(diff>0.5)ins.push({t:'warn',e:'⚖️',title:'Peso subiu '+diff+'kg',sub:'Pode ser variação normal. Mantenha a rotina!'});
+  }
+  if(!pesos.length)ins.push({t:'warn',e:'⚖️',title:'Registre seu peso',sub:'Vá em Corpo → Peso para começar!'});
+  if(pesos.length&&p.meta){
+    var falta=parseFloat((pesos[pesos.length-1].peso-parseFloat(p.meta)).toFixed(1));
+    if(falta<=0)ins.push({t:'ok',e:'🏆',title:'META ATINGIDA! Parabéns! 🏆',sub:'Dedicação que dá resultado!'});
+    else if(falta<=2)ins.push({t:'ok',e:'🎯',title:'Faltam só '+falta+'kg para a meta!',sub:'Você está quase lá!'});
+  }
+  return ins;
+}
+function renderInsights(){
+  var ins=calcInsights(),card=document.getElementById('ins-card'),list=document.getElementById('ins-list');
+  if(!ins.length){card.style.display='none';return;}
+  card.style.display='block';
+  list.innerHTML=ins.map(function(i){return '<div class="ins-item ins-'+i.t+'"><div class="ins-emoji">'+i.e+'</div><div class="ins-body"><div class="ins-title">'+i.title+'</div><div class="ins-sub">'+i.sub+'</div></div></div>';}).join('');
+  var bad=ins.filter(function(i){return i.t==='bad';}),ok=ins.filter(function(i){return i.t==='ok';});
+  setTimeout(function(){if(bad.length)showNotif(bad[0].title,'bad',bad[0].e);else if(ok.length)showNotif(ok[0].title,'success',ok[0].e);},800);
+}
 init();
 
 // ═══ RELATÓRIO ════════════════════════════════════════════════════
@@ -1261,122 +1718,6 @@ function compartilharRelatorio() {
   }
 }
 
-function imprimirRelatorio() {
-  if(!relTexto){fb('fb-rel','⚠ Gere o relatório primeiro');return;}
-  const nome = document.getElementById('rel-nome').value || 'Paciente';
-  const obsP = document.getElementById('rel-obs').value || '';
-  const p = S.perfil;
-  const pesos  = S.pesos.filter(r=>inPeriod(r.data));
-  const bio    = S.bio.filter(r=>inPeriod(r.data));
-  const exames = S.exames.filter(r=>inPeriod(r.data));
-  const pratos = S.pratos.filter(r=>inPeriod(r.data));
-  const diasArr= Object.entries(S.dias).filter(([d])=>inPeriod(d)).sort((a,b)=>a[0].localeCompare(b[0]));
-  const todosTreinos = diasArr.flatMap(([d,v])=>(v.treinos||[]).map(t=>({...t,data:d})));
-  const diasComSono  = diasArr.filter(([,v])=>v.sono);
-  const diasComMood  = diasArr.filter(([,v])=>v.mood);
-  const diasComAgua  = diasArr.filter(([,v])=>v.agua>0);
-  const periodoTxt   = relDataDe ? fmtD(relDataDe)+' a '+fmtD(relDataAte) : 'Todo o período';
-  const hoje = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
-  const pesoAtual   = pesos.length ? pesos[pesos.length-1].peso : null;
-  const pesoInicial = pesos.length ? pesos[0].peso : null;
-  const lastBio = bio.length ? bio[bio.length-1] : null;
-  const lbl = {gordura_pct:'Gordura corporal',musculo_kg:'Massa muscular',agua_pct:'Água corporal',gordura_visceral:'Gordura visceral',ossea_kg:'Massa óssea',imc:'IMC',idade_metabolica:'Idade metabólica',tmb_kcal:'TMB'};
-  const uni = {gordura_pct:'%',musculo_kg:'kg',agua_pct:'%',gordura_visceral:'',ossea_kg:'kg',imc:'',idade_metabolica:'anos',tmb_kcal:'kcal'};
-
-  const bioRows = lastBio && lastBio.valores
-    ? Object.entries(lbl).filter(([k])=>lastBio.valores[k]!=null).map(([k,l])=>'<tr><td>'+l+'</td><td><strong>'+lastBio.valores[k]+' '+uni[k]+'</strong></td></tr>').join('')
-    : '<tr><td colspan="2" style="color:#888">Sem dados</td></tr>';
-
-  const examesRows = exames.length
-    ? exames.map(ex=>'<tr><td>'+fmtD(ex.data)+'</td><td>'+(ex.tipo==='manual'&&ex.valores ? Object.entries(ex.valores).map(([k,v])=>k+': '+v).join(', ') : ex.raw ? ex.raw.slice(0,300)+'…' : '')+'</td></tr>').join('')
-    : '<tr><td colspan="2" style="color:#888">Sem exames</td></tr>';
-
-  const mediaCalDia = pratos.length ? Math.round(pratos.reduce((s,r)=>s+(r.ia&&r.ia.calorias||0),0)/Math.max(1,new Set(pratos.map(r=>r.data)).size)) : 0;
-  const mediaHSono  = diasComSono.length ? (diasComSono.reduce((s,[,v])=>s+v.sono.horas,0)/diasComSono.length).toFixed(1) : '-';
-  const mediaAgua   = diasComAgua.length ? Math.round(diasComAgua.reduce((s,[,v])=>s+(v.agua||0),0)/diasComAgua.length) : 0;
-  const mediaEn     = diasComMood.length ? (diasComMood.reduce((s,[,v])=>s+v.mood.energia,0)/diasComMood.length).toFixed(1) : '-';
-  const totalTreinoMin = todosTreinos.reduce((s,t)=>s+t.duracao,0);
-  const pSaudaveis  = pratos.filter(r=>r.ia&&(r.ia.avaliacao==='excelente'||r.ia.avaliacao==='boa')).length;
-  const pMelhorar   = pratos.filter(r=>r.ia&&(r.ia.avaliacao==='regular'||r.ia.avaliacao==='ruim')).length;
-  const varPeso     = pesoAtual&&pesoInicial ? (pesoAtual-pesoInicial>0?'+':'')+(pesoAtual-pesoInicial).toFixed(1)+' kg' : '—';
-  const varCor      = pesoAtual&&pesoInicial&&pesoAtual<pesoInicial ? '#0d6e44' : '#c0392b';
-  const aguaFmt     = mediaAgua>=1000 ? (mediaAgua/1000).toFixed(1)+'L' : mediaAgua+'ml';
-
-  const perfilRow = (p.sexo||p.idade||p.altura||p.atividade)
-    ? '<h2>👤 Perfil</h2><table><tr>'
-      +(p.sexo    ? '<td>Sexo: <strong>'+p.sexo+'</strong></td>' : '')
-      +(p.idade   ? '<td>Idade: <strong>'+p.idade+' anos</strong></td>' : '')
-      +(p.altura  ? '<td>Altura: <strong>'+p.altura+' cm</strong></td>' : '')
-      +(p.atividade?'<td>Atividade: <strong>'+p.atividade+'</strong></td>' : '')
-      +'</tr></table>' : '';
-
-  const obsSection = obsP
-    ? '<h2>📝 Observações do Paciente</h2><div class="obs">'+obsP+'</div>'
-    : '';
-
-  const css = 'body{font-family:Arial,sans-serif;color:#1a1a1a;padding:28px 36px;max-width:800px;margin:0 auto;font-size:13px}'
-    +'h1{font-size:22px;color:#0d6e44;margin-bottom:2px}'
-    +'.sub{color:#888;font-size:12px;margin-bottom:24px}'
-    +'h2{font-size:14px;color:#0d6e44;border-bottom:2px solid #0d6e44;padding-bottom:4px;margin:20px 0 10px;text-transform:uppercase;letter-spacing:.05em}'
-    +'table{width:100%;border-collapse:collapse;margin-bottom:10px}'
-    +'td,th{padding:7px 10px;border:1px solid #e0e0e0;font-size:12px}'
-    +'th{background:#f4faf7;color:#0d6e44;font-weight:700;text-align:left}'
-    +'tr:nth-child(even){background:#fafafa}'
-    +'.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}'
-    +'.sc{background:#f4faf7;border:1px solid #c8e8d8;border-radius:8px;padding:12px;text-align:center}'
-    +'.sc .v{font-size:22px;font-weight:700;color:#0d6e44}'
-    +'.sc .l{font-size:10px;color:#666;text-transform:uppercase;margin-top:2px}'
-    +'.obs{background:#fffbe6;border:1px solid #ffd060;border-radius:6px;padding:12px;font-style:italic;color:#555}'
-    +'.ft{margin-top:28px;border-top:1px solid #ddd;padding-top:12px;font-size:11px;color:#999;text-align:center}'
-    +'@media print{body{padding:14px}}';
-
-  const html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">'
-    +'<title>Relatório — '+nome+'</title>'
-    +'<style>'+css+'</style></head><body>'
-    +'<h1>📋 Relatório de Saúde</h1>'
-    +'<div class="sub">Paciente: <strong>'+nome+'</strong> &nbsp;|&nbsp; Período: '+periodoTxt+' &nbsp;|&nbsp; Gerado em: '+hoje+'</div>'
-    +perfilRow
-    +'<h2>⚖️ Evolução do Peso</h2>'
-    +'<div class="sg">'
-    +'<div class="sc"><div class="v">'+(pesoInicial?pesoInicial+' kg':'—')+'</div><div class="l">Peso inicial</div></div>'
-    +'<div class="sc"><div class="v">'+(pesoAtual?pesoAtual+' kg':'—')+'</div><div class="l">Peso atual</div></div>'
-    +'<div class="sc"><div class="v" style="color:'+varCor+'">'+varPeso+'</div><div class="l">Variação</div></div>'
-    +'<div class="sc"><div class="v">'+(p.meta?p.meta+' kg':'—')+'</div><div class="l">Meta</div></div>'
-    +'</div>'
-    +'<h2>📊 Bioimpedância'+(lastBio?' — Última: '+fmtD(lastBio.data):'')+'</h2>'
-    +'<table><tr><th>Indicador</th><th>Valor</th></tr>'+bioRows+'</table>'
-    +'<h2>🔬 Exames Laboratoriais</h2>'
-    +'<table><tr><th>Data</th><th>Resultados</th></tr>'+examesRows+'</table>'
-    +'<h2>🍽️ Alimentação</h2>'
-    +'<div class="sg">'
-    +'<div class="sc"><div class="v">'+pratos.length+'</div><div class="l">Refeições</div></div>'
-    +'<div class="sc"><div class="v">~'+mediaCalDia+'</div><div class="l">Média kcal/dia</div></div>'
-    +'<div class="sc"><div class="v">'+pSaudaveis+'</div><div class="l">Saudáveis</div></div>'
-    +'<div class="sc"><div class="v">'+pMelhorar+'</div><div class="l">A melhorar</div></div>'
-    +'</div>'
-    +'<h2>😴 Sono · 💧 Hidratação · 🏃 Treino</h2>'
-    +'<div class="sg">'
-    +'<div class="sc"><div class="v">'+mediaHSono+'h</div><div class="l">Sono médio</div></div>'
-    +'<div class="sc"><div class="v">'+aguaFmt+'</div><div class="l">Água/dia</div></div>'
-    +'<div class="sc"><div class="v">'+todosTreinos.length+'</div><div class="l">Treinos</div></div>'
-    +'<div class="sc"><div class="v">'+totalTreinoMin+'min</div><div class="l">Atividade total</div></div>'
-    +'</div>'
-    +'<h2>😊 Humor & Energia</h2>'
-    +'<div class="sg">'
-    +'<div class="sc"><div class="v">'+mediaEn+'/10</div><div class="l">Energia média</div></div>'
-    +'<div class="sc"><div class="v">'+diasComMood.length+'</div><div class="l">Dias registrados</div></div>'
-    +'<div class="sc"><div class="v">'+diasComSono.filter(([,v])=>v.sono.qualidade==='ótima'||v.sono.qualidade==='boa').length+'</div><div class="l">Noites boas</div></div>'
-    +'<div class="sc"><div class="v">'+diasArr.length+'</div><div class="l">Dias no período</div></div>'
-    +'</div>'
-    +obsSection
-    +'<div class="ft">Relatório gerado pelo aplicativo LevelUp — '+hoje+'</div>'
-    +'</body></html>';
-
-  const w = window.open('','_blank');
-  w.document.write(html);
-  w.document.close();
-  setTimeout(function(){ w.print(); }, 600);
-}
 
 </script>
 </body>
