@@ -531,7 +531,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
       <div class="ct">Compartilhar</div>
       <div style="display:flex;flex-direction:column;gap:10px">
         <button class="btn btn-p" onclick="copiarRelatorio()"><i class="ti ti-copy"></i> Copiar texto (WhatsApp)</button>
-        <button class="btn btn-o" onclick="imprimirRelatorio()"><i class="ti ti-printer"></i> Imprimir / Salvar como PDF</button>
+        
         <button class="btn btn-o" onclick="compartilharRelatorio()"><i class="ti ti-share"></i> Compartilhar</button>
       </div>
     </div>
@@ -1073,253 +1073,162 @@ function gerarRelatorio() {
   const nome = document.getElementById('rel-nome').value;
   const obs  = document.getElementById('rel-obs').value;
   const p    = S.perfil;
-  const pesos   = S.pesos.filter(r => inPeriod(r.data));
-  const bio     = S.bio.filter(r => inPeriod(r.data));
-  const exames  = S.exames.filter(r => inPeriod(r.data));
-  const pratos  = S.pratos.filter(r => inPeriod(r.data));
+  const pesos   = S.pesos.filter(function(r){ return inPeriod(r.data); });
+  const bio     = S.bio.filter(function(r){ return inPeriod(r.data); });
+  const exames  = S.exames.filter(function(r){ return inPeriod(r.data); });
+  const pratos  = S.pratos.filter(function(r){ return inPeriod(r.data); });
   const dias    = S.dias;
-  const diasArr = Object.entries(dias).filter(([d]) => inPeriod(d)).sort((a,b)=>a[0].localeCompare(b[0]));
-  const periodoTxt = relDataDe ? `${fmtD(relDataDe)} a ${fmtD(relDataAte)}` : 'Todo o período';
+  const diasArr = Object.entries(dias).filter(function(e){ return inPeriod(e[0]); }).sort(function(a,b){ return a[0].localeCompare(b[0]); });
+  const periodoTxt = relDataDe ? fmtD(relDataDe)+' a '+fmtD(relDataAte) : 'Todo o período';
   const hoje = new Date().toLocaleDateString('pt-BR', {day:'2-digit',month:'long',year:'numeric'});
 
-  let txt = '';
-  txt += '════════════════════════════════════
-';
-  txt += '       RELATÓRIO DE SAÚDE — LEVELUP
-';
-  txt += '════════════════════════════════════
-';
-  if(nome) txt += `Paciente: ${nome}
-`;
-  txt += `Período:  ${periodoTxt}
-`;
-  txt += `Gerado em: ${hoje}
-`;
-  txt += '────────────────────────────────────
+  var txt = '';
+  txt += '============================================';
+  txt += '      RELATORIO DE SAUDE — LEVELUP';
+  txt += '============================================';
+  if(nome) txt += 'Paciente: ' + nome + '';
+  txt += 'Periodo: ' + periodoTxt + '';
+  txt += 'Gerado em: ' + hoje + '';
+  txt += '--------------------------------------------';
 
-';
+  txt += 'PERFIL';
+  if(p.sexo)      txt += 'Sexo: ' + p.sexo + '  ';
+  if(p.idade)     txt += 'Idade: ' + p.idade + ' anos  ';
+  if(p.altura)    txt += 'Altura: ' + p.altura + ' cm';
+  if(p.atividade) txt += 'Atividade: ' + p.atividade + '';
+  if(p.restricoes)txt += 'Restricoes: ' + p.restricoes + '';
+  txt += '';
 
-  // Perfil
-  txt += '👤 PERFIL
-';
-  if(p.sexo)     txt += `Sexo: ${p.sexo}  `;
-  if(p.idade)    txt += `Idade: ${p.idade} anos  `;
-  if(p.altura)   txt += `Altura: ${p.altura} cm
-`;
-  if(p.atividade)txt += `Atividade: ${p.atividade}
-`;
-  if(p.restricoes)txt+=`Restrições: ${p.restricoes}
-`;
-  txt += '
-';
-
-  // Peso
-  txt += '⚖️  EVOLUÇÃO DO PESO
-';
+  txt += 'EVOLUCAO DO PESO';
   if(pesos.length) {
-    const primeiro = pesos[0], ultimo = pesos[pesos.length-1];
-    const diff = (ultimo.peso - primeiro.peso).toFixed(1);
-    txt += `Peso inicial do período: ${primeiro.peso} kg (${fmtD(primeiro.data)})
-`;
-    txt += `Peso atual:              ${ultimo.peso} kg (${fmtD(ultimo.data)})
-`;
-    txt += `Variação:                ${parseFloat(diff)>0?'+':''}${diff} kg
-`;
-    if(p.meta) txt += `Meta:                    ${p.meta} kg
-`;
-    txt += `Registros no período:    ${pesos.length}
-`;
-  } else txt += 'Sem registros no período.
-';
-  txt += '
-';
+    var primeiro = pesos[0], ultimo = pesos[pesos.length-1];
+    var diff = (ultimo.peso - primeiro.peso).toFixed(1);
+    txt += 'Peso inicial: ' + primeiro.peso + ' kg (' + fmtD(primeiro.data) + ')';
+    txt += 'Peso atual:   ' + ultimo.peso   + ' kg (' + fmtD(ultimo.data)   + ')';
+    txt += 'Variacao: ' + (parseFloat(diff)>0?'+':'') + diff + ' kg';
+    if(p.meta) txt += 'Meta: ' + p.meta + ' kg';
+    txt += 'Registros: ' + pesos.length + '';
+  } else txt += 'Sem registros no periodo.';
+  txt += '';
 
-  // Bioimpedância
-  txt += '📊 BIOIMPEDÂNCIA
-';
+  txt += 'BIOIMPEDANCIA';
   if(bio.length) {
-    const lbl={gordura_pct:'Gordura corporal',musculo_kg:'Massa muscular',agua_pct:'Água corporal',gordura_visceral:'Gordura visceral',ossea_kg:'Massa óssea',imc:'IMC',idade_metabolica:'Idade metabólica',tmb_kcal:'Taxa metab. basal'};
-    const uni={gordura_pct:'%',musculo_kg:'kg',agua_pct:'%',gordura_visceral:'',ossea_kg:'kg',imc:'',idade_metabolica:'anos',tmb_kcal:'kcal'};
-    const last=bio[bio.length-1];
-    txt += `Última medição: ${fmtD(last.data)}
-`;
-    Object.entries(lbl).forEach(([k,l])=>{ if(last.valores?.[k]!=null) txt+=`  ${l}: ${last.valores[k]} ${uni[k]}
-`; });
+    var lbl={gordura_pct:'Gordura corporal',musculo_kg:'Massa muscular',agua_pct:'Agua corporal',gordura_visceral:'Gordura visceral',ossea_kg:'Massa ossea',imc:'IMC',idade_metabolica:'Idade metabolica',tmb_kcal:'Taxa metab. basal'};
+    var uni={gordura_pct:'%',musculo_kg:'kg',agua_pct:'%',gordura_visceral:'',ossea_kg:'kg',imc:'',idade_metabolica:'anos',tmb_kcal:'kcal'};
+    var last=bio[bio.length-1];
+    txt += 'Ultima medicao: ' + fmtD(last.data) + '';
+    Object.entries(lbl).forEach(function(e){ var k=e[0],l=e[1]; if(last.valores&&last.valores[k]!=null) txt+='  '+l+': '+last.valores[k]+' '+(uni[k]||'')+''; });
     if(bio.length>1) {
-      const first=bio[0];
-      txt += `Medição anterior: ${fmtD(first.data)}
-`;
-      if(first.valores?.gordura_pct!=null && last.valores?.gordura_pct!=null) {
-        const dg=(last.valores.gordura_pct-first.valores.gordura_pct).toFixed(1);
-        txt += `  Variação gordura: ${parseFloat(dg)>0?'+':''}${dg}%
-`;
+      var first=bio[0];
+      txt += 'Medicao anterior: ' + fmtD(first.data) + '';
+      if(first.valores&&first.valores.gordura_pct!=null&&last.valores&&last.valores.gordura_pct!=null) {
+        var dg=(last.valores.gordura_pct-first.valores.gordura_pct).toFixed(1);
+        txt += '  Var. gordura: '+(parseFloat(dg)>0?'+':'')+dg+'%';
       }
-      if(first.valores?.musculo_kg!=null && last.valores?.musculo_kg!=null) {
-        const dm=(last.valores.musculo_kg-first.valores.musculo_kg).toFixed(1);
-        txt += `  Variação músculo: ${parseFloat(dm)>0?'+':''}${dm} kg
-`;
+      if(first.valores&&first.valores.musculo_kg!=null&&last.valores&&last.valores.musculo_kg!=null) {
+        var dm=(last.valores.musculo_kg-first.valores.musculo_kg).toFixed(1);
+        txt += '  Var. musculo: '+(parseFloat(dm)>0?'+':'')+dm+' kg';
       }
     }
-    txt += `Total de medições: ${bio.length}
-`;
-  } else txt += 'Sem medições no período.
-';
-  txt += '
-';
+    txt += 'Total medicoes: ' + bio.length + '';
+  } else txt += 'Sem medicoes no periodo.';
+  txt += '';
 
-  // Exames
-  txt += '🔬 EXAMES LABORATORIAIS
-';
+  txt += 'EXAMES LABORATORIAIS';
   if(exames.length) {
-    exames.forEach(ex => {
-      txt += `📅 ${fmtD(ex.data)}
-`;
-      if(ex.tipo==='manual' && ex.valores) {
-        Object.entries(ex.valores).forEach(([k,v])=>txt+=`  ${k}: ${v}
-`);
+    exames.forEach(function(ex) {
+      txt += fmtD(ex.data) + '';
+      if(ex.tipo==='manual'&&ex.valores) {
+        Object.entries(ex.valores).forEach(function(e){ txt+='  '+e[0]+': '+e[1]+''; });
       } else if(ex.raw) {
-        txt += ex.raw.slice(0,500)+'
-';
+        txt += ex.raw.slice(0,500)+'';
       }
-      if(ex.obs) txt+=`  Obs: ${ex.obs}
-`;
-      txt+='
-';
+      if(ex.obs) txt+='  Obs: '+ex.obs+'';
+      txt+='';
     });
-  } else txt += 'Sem exames no período.
+  } else txt += 'Sem exames no periodo.';
 
-';
-
-  // Alimentação
-  txt += '🍽️  ALIMENTAÇÃO
-';
+  txt += 'ALIMENTACAO';
   if(pratos.length) {
-    const totalCal = pratos.reduce((s,r)=>s+(r.ia?.calorias||0),0);
-    const mediaCalDia = pratos.length ? Math.round(totalCal/Math.max(1,new Set(pratos.map(r=>r.data)).size)) : 0;
-    const avs = pratos.map(r=>r.ia?.avaliacao).filter(Boolean);
-    const countAv = avs.reduce((a,b)=>({...a,[b]:(a[b]||0)+1}),{});
-    txt += `Refeições registradas: ${pratos.length}
-`;
-    txt += `Média calórica/dia:    ~${mediaCalDia} kcal
-`;
-    if(countAv.excelente||countAv.boa) txt+=`Refeições saudáveis:   ${(countAv.excelente||0)+(countAv.boa||0)}
-`;
-    if(countAv.regular||countAv.ruim) txt+=`A melhorar:            ${(countAv.regular||0)+(countAv.ruim||0)}
-`;
-    const ultimas = [...pratos].reverse().slice(0,5);
-    txt += 'Últimas refeições:
-';
-    ultimas.forEach(r=>txt+=`  ${fmtD(r.data)} — ${r.tipo}: ${r.ia?.calorias||'?'} kcal (${r.ia?.avaliacao||'?'})
-`);
-  } else txt += 'Sem registros no período.
-';
-  txt += '
-';
+    var totalCal = pratos.reduce(function(s,r){ return s+(r.ia&&r.ia.calorias||0); },0);
+    var diasUnicos = new Set(pratos.map(function(r){ return r.data; })).size;
+    var mediaCalDia = Math.round(totalCal/Math.max(1,diasUnicos));
+    txt += 'Refeicoes registradas: ' + pratos.length + '';
+    txt += 'Media calorica/dia: ~' + mediaCalDia + ' kcal';
+    var saudaveis = pratos.filter(function(r){ return r.ia&&(r.ia.avaliacao==='excelente'||r.ia.avaliacao==='boa'); }).length;
+    var melhorar  = pratos.filter(function(r){ return r.ia&&(r.ia.avaliacao==='regular'||r.ia.avaliacao==='ruim'); }).length;
+    if(saudaveis) txt += 'Refeicoes saudaveis: ' + saudaveis + '';
+    if(melhorar)  txt += 'A melhorar: ' + melhorar + '';
+    var ultimas = pratos.slice(-5).reverse();
+    txt += 'Ultimas refeicoes:';
+    ultimas.forEach(function(r){ txt+='  '+fmtD(r.data)+' - '+r.tipo+': '+(r.ia&&r.ia.calorias||'?')+' kcal ('+(r.ia&&r.ia.avaliacao||'?')+')'; });
+  } else txt += 'Sem registros no periodo.';
+  txt += '';
 
-  // Sono
-  txt += '😴 SONO
-';
-  const diasComSono = diasArr.filter(([,v])=>v.sono);
+  txt += 'SONO';
+  var diasComSono = diasArr.filter(function(e){ return e[1].sono; });
   if(diasComSono.length) {
-    const mediaH = (diasComSono.reduce((s,[,v])=>s+v.sono.horas,0)/diasComSono.length).toFixed(1);
-    txt += `Dias registrados: ${diasComSono.length}
-`;
-    txt += `Média de horas:   ${mediaH}h por noite
-`;
-    const quals = diasComSono.map(([,v])=>v.sono.qualidade);
-    const cq = quals.reduce((a,b)=>({...a,[b]:(a[b]||0)+1}),{});
-    txt += 'Qualidade:
-';
-    Object.entries(cq).forEach(([q,n])=>txt+=`  ${q}: ${n}x
-`);
-  } else txt += 'Sem registros no período.
-';
-  txt += '
-';
+    var mediaH = (diasComSono.reduce(function(s,e){ return s+e[1].sono.horas; },0)/diasComSono.length).toFixed(1);
+    txt += 'Dias registrados: ' + diasComSono.length + '';
+    txt += 'Media de horas: ' + mediaH + 'h por noite';
+    var quals = diasComSono.map(function(e){ return e[1].sono.qualidade; });
+    var cq = quals.reduce(function(a,b){ a[b]=(a[b]||0)+1; return a; },{});
+    txt += 'Qualidade:';
+    Object.entries(cq).forEach(function(e){ txt+='  '+e[0]+': '+e[1]+'x'; });
+  } else txt += 'Sem registros no periodo.';
+  txt += '';
 
-  // Água
-  txt += '💧 HIDRATAÇÃO
-';
-  const diasComAgua = diasArr.filter(([,v])=>v.agua>0);
+  txt += 'HIDRATACAO';
+  var diasComAgua = diasArr.filter(function(e){ return e[1].agua>0; });
   if(diasComAgua.length) {
-    const mediaAgua = Math.round(diasComAgua.reduce((s,[,v])=>s+(v.agua||0),0)/diasComAgua.length);
-    txt += `Dias registrados: ${diasComAgua.length}
-`;
-    txt += `Média diária:     ${mediaAgua>=1000?(mediaAgua/1000).toFixed(1)+'L':mediaAgua+'ml'}/dia
-`;
-    txt += `Meta:             ${p.agua_meta||2000}ml/dia
-`;
-  } else txt += 'Sem registros no período.
-';
-  txt += '
-';
+    var mediaAgua = Math.round(diasComAgua.reduce(function(s,e){ return s+(e[1].agua||0); },0)/diasComAgua.length);
+    txt += 'Dias registrados: ' + diasComAgua.length + '';
+    txt += 'Media diaria: ' + (mediaAgua>=1000?(mediaAgua/1000).toFixed(1)+'L':mediaAgua+'ml') + '/dia';
+    txt += 'Meta: ' + (p.agua_meta||2000) + 'ml/dia';
+  } else txt += 'Sem registros no periodo.';
+  txt += '';
 
-  // Treinos
-  txt += '🏃 ATIVIDADE FÍSICA
-';
-  const todosTreinos = diasArr.flatMap(([d,v])=>(v.treinos||[]).map(t=>({...t,data:d})));
+  txt += 'ATIVIDADE FISICA';
+  var todosTreinos = diasArr.reduce(function(arr,e){ return arr.concat((e[1].treinos||[]).map(function(t){ return Object.assign({},t,{data:e[0]}); })); },[]);
   if(todosTreinos.length) {
-    const totalMin = todosTreinos.reduce((s,t)=>s+t.duracao,0);
-    const tipos = todosTreinos.reduce((a,t)=>({...a,[t.tipo]:(a[t.tipo]||0)+1}),{});
-    txt += `Treinos realizados: ${todosTreinos.length}
-`;
-    txt += `Tempo total:        ${totalMin} minutos (${(totalMin/60).toFixed(1)}h)
-`;
-    txt += 'Modalidades:
-';
-    Object.entries(tipos).sort((a,b)=>b[1]-a[1]).forEach(([tipo,n])=>txt+=`  ${tipo}: ${n}x
-`);
-  } else txt += 'Sem registros no período.
-';
-  txt += '
-';
+    var totalMin = todosTreinos.reduce(function(s,t){ return s+t.duracao; },0);
+    var tipos = todosTreinos.reduce(function(a,t){ a[t.tipo]=(a[t.tipo]||0)+1; return a; },{});
+    txt += 'Treinos: ' + todosTreinos.length + '';
+    txt += 'Tempo total: ' + totalMin + ' minutos (' + (totalMin/60).toFixed(1) + 'h)';
+    txt += 'Modalidades:';
+    Object.entries(tipos).sort(function(a,b){ return b[1]-a[1]; }).forEach(function(e){ txt+='  '+e[0]+': '+e[1]+'x'; });
+  } else txt += 'Sem registros no periodo.';
+  txt += '';
 
-  // Humor
-  txt += '😊 HUMOR & ENERGIA
-';
-  const diasComMood = diasArr.filter(([,v])=>v.mood);
+  txt += 'HUMOR & ENERGIA';
+  var diasComMood = diasArr.filter(function(e){ return e[1].mood; });
   if(diasComMood.length) {
-    const mediaEn = (diasComMood.reduce((s,[,v])=>s+v.mood.energia,0)/diasComMood.length).toFixed(1);
-    txt += `Dias registrados: ${diasComMood.length}
-`;
-    txt += `Energia média:    ${mediaEn}/10
-`;
-    const moods = diasComMood.map(([,v])=>v.mood.label);
-    const cm = moods.reduce((a,b)=>({...a,[b]:(a[b]||0)+1}),{});
-    txt += 'Humor predominante:
-';
-    Object.entries(cm).sort((a,b)=>b[1]-a[1]).forEach(([m,n])=>txt+=`  ${m}: ${n}x
-`);
-  } else txt += 'Sem registros no período.
-';
-  txt += '
-';
+    var mediaEn = (diasComMood.reduce(function(s,e){ return s+e[1].mood.energia; },0)/diasComMood.length).toFixed(1);
+    txt += 'Dias registrados: ' + diasComMood.length + '';
+    txt += 'Energia media: ' + mediaEn + '/10';
+    var moods = diasComMood.map(function(e){ return e[1].mood.label; });
+    var cm = moods.reduce(function(a,b){ a[b]=(a[b]||0)+1; return a; },{});
+    txt += 'Humor predominante:';
+    Object.entries(cm).sort(function(a,b){ return b[1]-a[1]; }).forEach(function(e){ txt+='  '+e[0]+': '+e[1]+'x'; });
+  } else txt += 'Sem registros no periodo.';
+  txt += '';
 
-  // Obs do paciente
   if(obs) {
-    txt += '📝 OBSERVAÇÕES DO PACIENTE
-';
-    txt += obs + '
-
-';
+    txt += 'OBSERVACOES DO PACIENTE';
+    txt += obs + '';
   }
 
-  txt += '────────────────────────────────────
-';
-  txt += 'Relatório gerado pelo app LevelUp
-';
-  txt += `${hoje}
-`;
-  txt += '════════════════════════════════════
-';
+  txt += '--------------------------------------------';
+  txt += 'Relatorio gerado pelo app LevelUp';
+  txt += hoje + '';
+  txt += '============================================';
 
   relTexto = txt;
   document.getElementById('rel-preview').textContent = txt;
   document.getElementById('rel-resultado').style.display = 'block';
-  fb('fb-rel', '✓ Relatório gerado!');
+  fb('fb-rel', 'Relatorio gerado!');
   document.getElementById('rel-resultado').scrollIntoView({behavior:'smooth',block:'start'});
 }
-
 function copiarRelatorio() {
   if(!relTexto){fb('fb-rel','⚠ Gere o relatório primeiro');return;}
   navigator.clipboard.writeText(relTexto).then(()=>{
@@ -1332,6 +1241,15 @@ function copiarRelatorio() {
     document.body.removeChild(ta);
     fb('fb-rel','✓ Copiado!');
   });
+}
+
+function compartilharRelatorio() {
+  if(!relTexto){fb('fb-rel','⚠ Gere o relatório primeiro');return;}
+  if(navigator.share) {
+    navigator.share({title:'Relatório de Saúde — LevelUp',text:relTexto}).catch(()=>{});
+  } else {
+    copiarRelatorio();
+  }
 }
 
 function compartilharRelatorio() {
