@@ -664,6 +664,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 var db   = firebase.firestore();
+var ANTHROPIC_KEY = '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';
 var auth = firebase.auth();
 var currentUser = null;
 
@@ -924,7 +925,7 @@ async function analisarPrato() {
     const p=S.perfil; const pesos=S.pesos;
     const pesoAtual=pesos.length?pesos[pesos.length-1].peso:'?';
     var descEl=document.getElementById('prato-descricao');var descricao=descEl?descEl.value.trim():'';
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({
       model:'claude-sonnet-4-20250514',max_tokens:900,
       messages:[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:'image/jpeg',data:pratoB64}},
@@ -1001,7 +1002,7 @@ async function lerBioIA() {
   if(!bioB64) return;
   document.getElementById('bio-ld').style.display='flex';document.getElementById('bio-ia-r').style.display='none';document.getElementById('btn-ler-bio').disabled=true;
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:bioB64}},{type:'text',text:'Foto de balança de bioimpedância. Extraia TODOS os dados. Responda SOMENTE em JSON:\n{"peso":null,"gordura_pct":null,"musculo_kg":null,"agua_pct":null,"gordura_visceral":null,"ossea_kg":null,"imc":null,"idade_metabolica":null,"tmb_kcal":null,"outros":"outros valores"}'}]}]})});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:bioB64}},{type:'text',text:'Foto de balança de bioimpedância. Extraia TODOS os dados. Responda SOMENTE em JSON:\n{"peso":null,"gordura_pct":null,"musculo_kg":null,"agua_pct":null,"gordura_visceral":null,"ossea_kg":null,"imc":null,"idade_metabolica":null,"tmb_kcal":null,"outros":"outros valores"}'}]}]})});
     const d=await res.json();
     bioIaData=JSON.parse(d.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim());
     const lbl={peso:'Peso',gordura_pct:'Gordura',musculo_kg:'Músculo',agua_pct:'Água',gordura_visceral:'Visceral',ossea_kg:'Óssea',imc:'IMC',idade_metabolica:'Id. met.',tmb_kcal:'TMB'};
@@ -1069,7 +1070,7 @@ async function lerExIA(){
   try{
     const isImg=exType.startsWith('image');
     const block=isImg?{type:'image',source:{type:'base64',media_type:exType,data:exB64}}:{type:'document',source:{type:'base64',media_type:'application/pdf',data:exB64}};
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:[block,{type:'text',text:'Resultado de exame laboratorial. Extraia todos os valores com nome, resultado, unidade e referência. Liste em português de forma organizada.'}]}]})});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:[block,{type:'text',text:'Resultado de exame laboratorial. Extraia todos os valores com nome, resultado, unidade e referência. Liste em português de forma organizada.'}]}]})});
     const d=await res.json();
     exIaRaw=d.content.map(i=>i.text||'').join('');
     document.getElementById('ex-ia-txt').textContent=exIaRaw;
@@ -1205,7 +1206,7 @@ async function gerarPlano(){
   if(dh.agua)hojeTxt.push(`Água:${dh.agua}ml`);
   (dh.treinos||[]).forEach(t=>hojeTxt.push(`Treino:${t.tipo}${t.duracao}min`));
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1400,messages:[{role:'user',content:`Personal trainer e nutricionista. Crie plano personalizado baseado em:
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1400,messages:[{role:'user',content:`Personal trainer e nutricionista. Crie plano personalizado baseado em:
 Perfil: ${p.sexo||'?'}, ${p.idade||'?'}a, ${p.altura||'?'}cm, ${peso}kg, IMC:${imc}, meta:${p.meta||'?'}kg, atividade:${p.atividade||'sedentário'}, restrições:${p.restricoes||'nenhuma'}
 Bioimpedância: ${bioTxt}
 Exames: ${exTxt}
