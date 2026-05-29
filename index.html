@@ -239,7 +239,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 <div id="app" style="display:none">
 <div class="hdr">
   <div class="hdr-row">
-    <div><div class="app-logo">LevelUp</div><div class="hdr-date" id="hdr-date"></div></div>
+    <div><div class="app-logo">LevelUp</div><div class="hdr-date" id="hdr-date"></div>
+      <div id="save-status" style="font-size:10px;color:#2dff8e;opacity:0;transition:opacity 0.5s;margin-top:2px"></div></div>
     <div style="display:flex;align-items:center;gap:10px">
     <div id="user-avatar" style="width:28px;height:28px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--accent);cursor:pointer;overflow:hidden" onclick="showUserMenu()">
       <i class="ti ti-user"></i>
@@ -328,14 +329,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
     </div>
     <input type="file" id="prato-file" accept="image/*" style="display:none" onchange="handlePratoFile(event)">
     <div id="prato-prev-wrap" style="display:none">
-      <img id="prato-prev" class="prev-img" alt="Foto do prato">
-      <div class="fg" style="margin-top:12px">
+      <div id="prato-thumbs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"></div>
+      <div id="prato-count-txt" style="font-size:11px;color:var(--text3);margin-bottom:10px"></div>
+      <div class="fg">
         <label>Descreva o prato <span style="font-size:10px;color:var(--text3)">opcional — melhora muito a análise</span></label>
         <textarea id="prato-descricao" rows="3" style="resize:none" placeholder="Ex: macarrão ao molho branco com bacon, porção grande, sem sal..."></textarea>
       </div>
       <div class="btn-row">
         <button class="btn btn-p btn-sm" id="btn-analisar" onclick="analisarPrato()" style="flex:1"><i class="ti ti-sparkles"></i> Analisar com IA</button>
-        <button class="btn btn-o btn-sm" onclick="limparPrato()">Remover</button>
+        <button class="btn btn-o btn-sm" onclick="limparPrato()">Remover tudo</button>
       </div>
     </div>
     <div id="prato-ld" class="ld" style="display:none"><span class="spin"><i class="ti ti-loader"></i></span> Analisando seu prato...</div>
@@ -394,8 +396,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
         </div>
         <input type="file" id="bio-file" accept="image/*" style="display:none" onchange="handleBioFile(event)">
         <div id="bio-prev-wrap" style="display:none">
-          <img id="bio-prev" class="prev-img" alt="Foto balança">
-          <div class="btn-row"><button class="btn btn-p btn-sm" id="btn-ler-bio" onclick="lerBioIA()" style="flex:1"><i class="ti ti-sparkles"></i> Extrair com IA</button><button class="btn btn-o btn-sm" onclick="limparBioFoto()">Remover</button></div>
+          <div id="bio-thumbs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-size:11px;color:var(--text3)" id="bio-count-txt"></div>
+            <button id="btn-add-bio" onclick="addBioFoto()" style="font-size:11px;padding:5px 10px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--accent);cursor:pointer;font-family:var(--font-h);font-weight:700"><i class="ti ti-plus"></i> Mais foto</button>
+          </div>
+          <div class="btn-row"><button class="btn btn-p btn-sm" id="btn-ler-bio" onclick="lerBioIA()" style="flex:1"><i class="ti ti-sparkles"></i> Extrair com IA</button><button class="btn btn-o btn-sm" onclick="limparBioFoto()">Remover tudo</button></div>
         </div>
         <div id="bio-ld" class="ld" style="display:none"><span class="spin"><i class="ti ti-loader"></i></span> Lendo dados...</div>
         <div id="bio-ia-r" style="display:none">
@@ -587,6 +593,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
     <div style="font-size:13px;color:var(--text3);margin-bottom:14px;line-height:1.65">Usa peso, bioimpedância, exames, refeições, água, sono e treinos para gerar um plano completo.</div>
     <button class="btn btn-p" id="btn-gerar" onclick="gerarPlano()"><i class="ti ti-sparkles"></i> Gerar meu plano</button>
     <div id="plano-ld" class="ld" style="display:none"><span class="spin"><i class="ti ti-loader"></i></span> Gerando plano personalizado...</div>
+    <div id="debug-panel" style="display:none;margin-top:12px;background:#0d1f1a;border:1px solid #ff5a5a;border-radius:10px;padding:12px">
+      <div style="font-size:11px;color:#ff5a5a;font-weight:700;margin-bottom:6px">DEBUG — Resposta da API:</div>
+      <div id="debug-txt" style="font-size:11px;color:#8ab89e;line-height:1.6;word-break:break-all;white-space:pre-wrap;max-height:200px;overflow-y:auto"></div>
+    </div>
   </div>
   <div id="plano-r" style="display:none">
     <div class="card"><div class="pt"><i class="ti ti-run"></i> Exercícios</div><div class="ptxt" id="pl-ex"></div></div>
@@ -652,7 +662,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script>
+<script>var bioB64s = [];
+
 // ═══ FIREBASE ════════════════════════════════════════════════════
 const firebaseConfig = {
   apiKey: "AIzaSyD2OTwZ5cYojmf5ZCZxrnV8gBx8doJDR7c",
@@ -697,34 +708,157 @@ function userDoc() {
   return db.collection('users').doc(currentUser.uid);
 }
 
-async function saveToFirebase(key, data) {
-  if(!currentUser) return;
-  try {
-    await userDoc().collection('data').doc(key).set({value: JSON.stringify(data), updatedAt: new Date()});
-  } catch(e) { console.error('Firebase save error:', e); }
+function showSaveStatus(msg, ok) {
+  var el = document.getElementById('save-status');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.color = ok ? '#2dff8e' : '#ff5a5a';
+  el.style.opacity = '1';
+  setTimeout(function(){ el.style.opacity = '0'; }, 3000);
 }
 
-async function loadFromFirebase(key) {
+var PROJECT_ID = 'levelup-app-84881';
+
+async function getIdToken() {
+  if(!currentUser) return null;
+  try { return await currentUser.getIdToken(true); } catch(e) { return null; }
+}
+
+function firestoreUrl(key) {
+  return 'https://firestore.googleapis.com/v1/projects/' + PROJECT_ID + 
+         '/databases/(default)/documents/users/' + currentUser.uid + '/data/' + key;
+}
+
+async function saveToFirebase(key, data) {
+  if(!currentUser) { showSaveStatus('⚠ Sem usuário', false); return; }
+  if(_isLoading) return;
+  showSaveStatus('⏳ Salvando...', true);
+  try {
+    var token = await getIdToken();
+    if(!token) { showSaveStatus('✗ Sem token', false); return; }
+    var jsonStr = JSON.stringify(data);
+    var body = JSON.stringify({
+      fields: {
+        value: { stringValue: jsonStr },
+        updatedAt: { stringValue: new Date().toISOString() },
+        uid: { stringValue: currentUser.uid }
+      }
+    });
+    var res = await fetch(firestoreUrl(key) + '?currentDocument.exists=false', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+    }).catch(function(){ return null; });
+    
+    // If create failed (doc exists), use PATCH to update
+    var patchRes = await fetch(firestoreUrl(key), {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: body
+    });
+    if(patchRes.ok) {
+      showSaveStatus('✓ Salvo na nuvem', true);
+    } else {
+      var err = await patchRes.text();
+      showSaveStatus('✗ Erro ' + patchRes.status, false);
+      console.error('Save failed:', err);
+    }
+  } catch(e) {
+    showSaveStatus('✗ ' + e.message, false);
+    console.error('Save error:', e);
+  }
+}
+
+async function loadFromFirebaseREST(key) {
   if(!currentUser) return null;
   try {
-    var doc = await userDoc().collection('data').doc(key).get();
-    if(doc.exists) return JSON.parse(doc.data().value);
-  } catch(e) { console.error('Firebase load error:', e); }
+    var token = await getIdToken();
+    if(!token) return null;
+    var res = await fetch(firestoreUrl(key), {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if(!res.ok) return null;
+    var doc = await res.json();
+    if(doc.fields && doc.fields.value && doc.fields.value.stringValue) {
+      return JSON.parse(doc.fields.value.stringValue);
+    }
+  } catch(e) { console.error('Load REST error:', key, e); }
   return null;
 }
 
+async function retryPendingSaves() {
+  if(!currentUser) return;
+  var pending = JSON.parse(localStorage.getItem('_pending_saves')||'{}');
+  var keys = Object.keys(pending);
+  if(!keys.length) return;
+  console.log('Retrying', keys.length, 'pending saves...');
+  for(var i=0; i<keys.length; i++) {
+    try {
+      await userDoc().collection('data').doc(keys[i]).set({
+        value: pending[keys[i]],
+        updatedAt: new Date(),
+        uid: currentUser.uid
+      });
+      delete pending[keys[i]];
+    } catch(e) { console.error('Retry failed for', keys[i]); }
+  }
+  localStorage.setItem('_pending_saves', JSON.stringify(pending));
+}
+
+// loadFromFirebase replaced by loadFromFirebaseREST
+
+
+var _isLoading = false;
+
 async function loadAllFromFirebase() {
   if(!currentUser) return;
+  _isLoading = true;
   showLoadingOverlay(true);
+
+  var statusEl = document.getElementById('save-status');
+  if(statusEl) { statusEl.textContent = '⏳ Carregando da nuvem...'; statusEl.style.opacity='1'; statusEl.style.color='#2dff8e'; }
+
   try {
     var keys = ['pesos','bio','exames','pratos','dias','perfil','metas'];
+    var loaded = 0;
+
     for(var i=0; i<keys.length; i++) {
-      var val = await loadFromFirebase(keys[i]);
-      if(val !== null) localStorage.setItem('lu_'+keys[i], JSON.stringify(val));
+      var k = keys[i];
+      try {
+        // Direct Firestore read - bypass loadFromFirebase wrapper
+        var fbVal = await loadFromFirebaseREST(k);
+        if(fbVal !== null) {
+          localStorage.setItem('lu_'+k, JSON.stringify(fbVal));
+          loaded++;
+          console.log('Loaded via REST:', k);
+        } else {
+          // Firebase empty - push local up
+          var localRaw = localStorage.getItem('lu_'+k);
+          if(localRaw && localRaw !== '[]' && localRaw !== '{}') {
+            _isLoading = false; // allow save
+            await saveToFirebase(k, JSON.parse(localRaw));
+            _isLoading = true;
+            console.log('Pushed local to Firebase:', k);
+          }
+        }
+      } catch(keyErr) {
+        console.error('Error loading key', k, keyErr);
+      }
     }
-  } catch(e) { console.error('Load error:', e); }
+
+    if(statusEl) { 
+      statusEl.textContent = loaded > 0 ? '✓ ' + loaded + ' registros carregados da nuvem' : '✓ Conectado'; 
+      setTimeout(function(){ if(statusEl) statusEl.style.opacity='0'; }, 3000);
+    }
+
+  } catch(e) {
+    console.error('Firebase load error:', e);
+    if(statusEl) { statusEl.textContent = '✗ Erro ao carregar: ' + e.message; statusEl.style.color='#ff5a5a'; }
+  }
+
   showLoadingOverlay(false);
+  _isLoading = false;
   init();
+  setTimeout(retryPendingSaves, 3000);
 }
 
 function showLoadingOverlay(show) {
@@ -744,7 +878,14 @@ const S = {
   get pratos()  { return JSON.parse(localStorage.getItem('lu_pratos')  ||'[]'); },
   get dias()    { return JSON.parse(localStorage.getItem('lu_dias')    ||'{}'); },
   get perfil()  { return JSON.parse(localStorage.getItem('lu_perfil')  ||'{}'); },
-  save(k,v)     { localStorage.setItem('lu_'+k, JSON.stringify(v)); }
+  save(k,v) {
+    var str = JSON.stringify(v);
+    localStorage.setItem('lu_'+k, str);
+    // Save to Firebase - defer slightly to not block UI
+    if(typeof saveToFirebase === 'function' && typeof _isLoading !== 'undefined' && !_isLoading && typeof currentUser !== 'undefined' && currentUser) {
+      saveToFirebase(k, v);
+    }
+  }
 };
 const today = () => new Date().toISOString().split('T')[0];
 const fmtD  = d => { const dt=new Date(d+'T12:00:00'); return dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'2-digit'}); };
@@ -819,7 +960,10 @@ function renderPesoHist() {
   if(!r.length){el.innerHTML='<div class="empty"><i class="ti ti-scale"></i>Nenhum registro ainda</div>';return;}
   el.innerHTML=[...r].reverse().slice(0,10).map((x,i,a)=>{
     const diff=a[i+1]?(x.peso-a[i+1].peso).toFixed(1):null;
-    return `<div class="hi"><div class="hih"><span class="hid">${x.peso.toFixed(1)} kg</span>${diff?`<span class="${parseFloat(diff)<0?'dg':'db'}">${parseFloat(diff)>0?'+':''}${diff} kg</span>`:''}</div><div style="font-size:11px;color:var(--text3)">${fmtD(x.data)}</div></div>`;
+    const origIdx = S.pesos.findIndex(function(p){return p.data===x.data&&p.peso===x.peso;});
+    return '<div class="hi"><div class="hih"><div><span class="hid">'+x.peso.toFixed(1)+' kg</span>'+(diff?'<span class="'+(parseFloat(diff)<0?'dg':'db')+'">'+(parseFloat(diff)>0?'+':'')+diff+' kg</span>':'')+'</div>'
+      +'<button onclick="deletarPeso('+origIdx+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:4px"><i class="ti ti-trash"></i></button></div>'
+      +'<div style="font-size:11px;color:var(--text3)">'+fmtD(x.data)+'</div></div>';
   }).join('');
 }
 
@@ -894,39 +1038,117 @@ function salvarTreino() {
 }
 
 // ═══ PRATO ════════════════════════════════════════════════════════
-function handlePratoFile(e) {
-  const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=ev=>{
-    pratoB64=ev.target.result.split(',')[1];
-    document.getElementById('prato-prev').src=ev.target.result;
-    document.getElementById('prato-prev-wrap').style.display='block';
-    document.getElementById('prato-upz').style.display='none';
-    document.getElementById('prato-resultado').style.display='none';
+var pratoB64s = [];
+
+function compressAndAdd(file, onDone) {
+  // Use FileReader for maximum Android compatibility
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+    var img = new Image();
+    img.onload = function() {
+      try {
+        var canvas = document.createElement('canvas');
+        var MAX = 800;
+        var w = img.width || MAX;
+        var h = img.height || MAX;
+        if(w > h) { if(w > MAX){ h = Math.round(h*MAX/w); w = MAX; } }
+        else       { if(h > MAX){ w = Math.round(w*MAX/h); h = MAX; } }
+        if(!w || w < 1) w = MAX;
+        if(!h || h < 1) h = MAX;
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        var compressed = canvas.toDataURL('image/jpeg', 0.75);
+        var b64 = compressed.split(',')[1];
+        if(b64) { onDone(b64, compressed); }
+        else {
+          // Canvas failed, use original
+          var orig = dataUrl.split(',')[1];
+          onDone(orig, dataUrl);
+        }
+      } catch(ce) {
+        // Canvas not available, use original
+        var orig = dataUrl.split(',')[1];
+        onDone(orig, dataUrl);
+      }
+    };
+    img.onerror = function() {
+      // Image load failed, try using raw data
+      var orig = dataUrl && dataUrl.includes(',') ? dataUrl.split(',')[1] : null;
+      if(orig && orig.length > 100) onDone(orig, dataUrl);
+      else alert('Erro ao processar imagem. Tente outra foto ou use uma imagem menor.');
+    };
+    img.src = dataUrl;
   };
-  r.readAsDataURL(f);
+  reader.onerror = function() { alert('Erro ao ler arquivo. Tente novamente.'); };
+  reader.readAsDataURL(file);
+}
+
+function handlePratoFile(e) {
+  var file = e.target.files[0];
+  if(!file) return;
+  compressAndAdd(file, function(b64, src) {
+    pratoB64s.push(b64);
+    var thumbs = document.getElementById('prato-thumbs');
+    var img = document.createElement('img');
+    img.src = src;
+    img.style.cssText = 'width:76px;height:76px;object-fit:cover;border-radius:8px;border:1px solid rgba(45,255,142,0.3)';
+    thumbs.appendChild(img);
+    var n = pratoB64s.length;
+    document.getElementById('prato-count-txt').innerHTML = n + (n===1?' foto':' fotos')
+      + ' &nbsp;<button onclick="addPratoFoto()" style="font-size:11px;padding:4px 10px;border-radius:8px;background:rgba(45,255,142,0.1);border:1px solid rgba(45,255,142,0.3);color:#2dff8e;cursor:pointer">+ Mais foto</button>';
+    document.getElementById('prato-prev-wrap').style.display = 'block';
+    document.getElementById('prato-upz').style.display = 'none';
+    document.getElementById('prato-resultado').style.display = 'none';
+  });
+}
+function addPratoFoto() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    if(!file) return;
+    compressAndAdd(file, function(b64, src) {
+      pratoB64s.push(b64);
+      var thumbs = document.getElementById('prato-thumbs');
+      var img = document.createElement('img');
+      img.src = src;
+      img.style.cssText = 'width:76px;height:76px;object-fit:cover;border-radius:8px;border:1px solid rgba(45,255,142,0.3)';
+      thumbs.appendChild(img);
+      var n = pratoB64s.length;
+      document.getElementById('prato-count-txt').innerHTML = n + (n===1?' foto':' fotos')
+        + ' &nbsp;<button onclick="addPratoFoto()" style="font-size:11px;padding:4px 10px;border-radius:8px;background:rgba(45,255,142,0.1);border:1px solid rgba(45,255,142,0.3);color:#2dff8e;cursor:pointer">+ Mais foto</button>';
+    });
+  };
+  input.click();
 }
 function limparPrato() {
-  pratoB64=null; pratoIaData=null;
+  pratoB64=null; pratoB64s=[]; pratoIaData=null;
   document.getElementById('prato-file').value='';
+  var thumbs=document.getElementById('prato-thumbs'); if(thumbs) thumbs.innerHTML='';
+  var cnt=document.getElementById('prato-count-txt'); if(cnt) cnt.innerHTML='';
   document.getElementById('prato-prev-wrap').style.display='none';
   document.getElementById('prato-upz').style.display='block';
   document.getElementById('prato-resultado').style.display='none';
   document.getElementById('prato-ld').style.display='none';
-  var descEl=document.getElementById('prato-descricao');
-  if(descEl) descEl.value='';
+  var descEl=document.getElementById('prato-descricao'); if(descEl) descEl.value='';
 }
 async function analisarPrato() {
-  if(!pratoB64) return;
+  if(!pratoB64s || !pratoB64s.length) return;
   document.getElementById('prato-ld').style.display='flex';
   document.getElementById('prato-resultado').style.display='none';
   document.getElementById('btn-analisar').disabled=true;
   try {
     const p=S.perfil; const pesos=S.pesos;
     const pesoAtual=pesos.length?pesos[pesos.length-1].peso:'?';
+    if(!pratoB64s || pratoB64s.length === 0) { alert('Selecione ao menos uma foto do prato.'); return; }
+    // Filter out empty/null base64 strings
+    pratoB64s = pratoB64s.filter(function(b){ return b && b.length > 100; });
+    if(pratoB64s.length === 0) { alert('Erro ao processar foto. Tente novamente.'); return; }
     var descEl=document.getElementById('prato-descricao');var descricao=descEl?descEl.value.trim():'';
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',max_tokens:900,
+      model:'claude-sonnet-4-5',max_tokens:900,
       messages:[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:'image/jpeg',data:pratoB64}},
         {type:'text',text:
@@ -939,12 +1161,18 @@ async function analisarPrato() {
         }
       ]}]
     })});
+    var httpStatus = res.status;
     const data=await res.json();
-    const txt=data.content.map(i=>i.text||'').join('');
+    if(data && data.error) throw new Error('API '+httpStatus+': '+data.error.message);
+    if(!data || !data.content || !Array.isArray(data.content)) throw new Error('Resposta invalida ('+httpStatus+'): '+JSON.stringify(data).slice(0,150));
+    const txt=data.content.map(function(i){return i.text||'';}).join('');
     pratoIaData=JSON.parse(txt.replace(/```json|```/g,'').trim());
     renderPratoIA(pratoIaData);
     document.getElementById('prato-resultado').style.display='block';
-  } catch(e) { alert('Erro ao analisar. Tente uma foto mais nítida.'); console.error(e); }
+  } catch(e) {
+    console.error('Prato error:', e);
+    alert('Erro ao analisar: ' + e.message);
+  }
   finally { document.getElementById('prato-ld').style.display='none'; document.getElementById('btn-analisar').disabled=false; }
 }
 function renderPratoIA(d) {
@@ -980,29 +1208,34 @@ function renderPratoHist() {
   const cores={excelente:'bg',boa:'bg',regular:'by',ruim:'br'};
   el.innerHTML=[...p].reverse().slice(0,10).map(r=>`
     <div class="hi">
-      <div class="hih"><span class="hid">${r.tipo}</span><span class="badge ${cores[r.ia?.avaliacao]||'by'}">${r.ia?.avaliacao||'—'}</span></div>
+      <div class="hih"><span class="hid">${r.tipo}</span><span class="badge ${cores[r.ia&&r.ia.avaliacao]||'by'}">${r.ia&&r.ia.avaliacao||'—'}</span></div>
       <div style="font-size:11px;color:var(--text3);margin-bottom:6px">${fmtD(r.data)}</div>
-      ${r.ia?`<div style="font-size:12px;color:var(--text2);margin-bottom:4px">🍽 ${r.ia.alimentos?.slice(0,60)||''}${(r.ia.alimentos?.length||0)>60?'…':''}</div>
+      ${r.ia?`<div style="font-size:12px;color:var(--text2);margin-bottom:4px">🍽 ${r.ia.alimentos&&r.ia.alimentos.slice(0,60)||''}${(r.ia.alimentos&&r.ia.alimentos.length||0)>60?'…':''}</div>
       <div style="display:flex;gap:10px;font-size:11px;color:var(--text3)"><span>🔥 ${r.ia.calorias||'?'} kcal</span><span>💪 ${r.ia.proteinas_g||'?'}g prot.</span><span>🍞 ${r.ia.carbs_g||'?'}g carbs</span></div>`:''}
     </div>`).join('');
 }
 
 // ═══ BIO ══════════════════════════════════════════════════════════
-function handleBioFile(e) {
-  const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=ev=>{bioB64=ev.target.result.split(',')[1];document.getElementById('bio-prev').src=ev.target.result;document.getElementById('bio-prev-wrap').style.display='block';document.getElementById('bio-upz').style.display='none';document.getElementById('bio-ia-r').style.display='none';};
-  r.readAsDataURL(f);
-}
+// handleBioFile moved below
 function limparBioFoto() {
-  bioB64=null;bioIaData=null;document.getElementById('bio-file').value='';
-  document.getElementById('bio-prev-wrap').style.display='none';document.getElementById('bio-upz').style.display='block';document.getElementById('bio-ia-r').style.display='none';document.getElementById('bio-ld').style.display='none';
+  bioB64=null;bioB64s=[];bioIaData=null;
+  document.getElementById('bio-file').value='';
+  document.getElementById('bio-thumbs').innerHTML='';
+  document.getElementById('bio-count-txt').textContent='';
+  document.getElementById('bio-prev-wrap').style.display='none';
+  document.getElementById('bio-upz').style.display='block';
+  document.getElementById('bio-ia-r').style.display='none';
+  document.getElementById('bio-ld').style.display='none';
+  var addBtn=document.getElementById('btn-add-bio');
+  if(addBtn) addBtn.style.display='block';
 }
 async function lerBioIA() {
-  if(!bioB64) return;
+  if(!bioB64s || bioB64s.length === 0) { alert('Selecione ao menos uma foto da balança.'); return; }
+  bioB64s = bioB64s.filter(function(b){ return b && b.length > 100; });
+  if(bioB64s.length === 0) { alert('Erro ao processar foto. Tente novamente.'); return; }
   document.getElementById('bio-ld').style.display='flex';document.getElementById('bio-ia-r').style.display='none';document.getElementById('btn-ler-bio').disabled=true;
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:bioB64}},{type:'text',text:'Foto de balança de bioimpedância. Extraia TODOS os dados. Responda SOMENTE em JSON:\n{"peso":null,"gordura_pct":null,"musculo_kg":null,"agua_pct":null,"gordura_visceral":null,"ossea_kg":null,"imc":null,"idade_metabolica":null,"tmb_kcal":null,"outros":"outros valores"}'}]}]})});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:700,messages:[{role:'user',content:[...bioB64s.map(function(b){return {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b}};}),{type:'text',text:'São '+(bioB64s.length)+' fotos/prints de uma balança de bioimpedância. Analise TODAS as imagens juntas e extraia todos os dados visíveis nas diferentes telas. Responda SOMENTE em JSON:\n{"peso":null,"gordura_pct":null,"musculo_kg":null,"agua_pct":null,"gordura_visceral":null,"ossea_kg":null,"imc":null,"idade_metabolica":null,"tmb_kcal":null,"outros":"outros valores"}'}]}]})});
     const d=await res.json();
     bioIaData=JSON.parse(d.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim());
     const lbl={peso:'Peso',gordura_pct:'Gordura',musculo_kg:'Músculo',agua_pct:'Água',gordura_visceral:'Visceral',ossea_kg:'Óssea',imc:'IMC',idade_metabolica:'Id. met.',tmb_kcal:'TMB'};
@@ -1019,8 +1252,24 @@ function salvarBioFoto() {
   if(!bioIaData) return;
   const data=document.getElementById('bio-data-foto').value||today();
   const arr=[...S.bio,{data,tipo:'foto',valores:bioIaData,obs:document.getElementById('bio-obs-foto').value}].sort((a,b)=>a.data.localeCompare(b.data));
-  S.save('bio',arr); fb('fb-bio-foto','✓ Salvo!'); limparBioFoto(); document.getElementById('bio-ia-r').style.display='none';
-  renderBioHist(); renderDash();
+  S.save('bio',arr);
+  // Auto-save weight from bio if available
+  if(bioIaData.peso) {
+    var pesos=[...S.pesos];
+    var exists=pesos.find(function(p){return p.data===data;});
+    if(!exists) {
+      pesos.push({data:data,peso:parseFloat(bioIaData.peso),origem:'bioimpedancia'});
+      pesos.sort(function(a,b){return a.data.localeCompare(b.data);});
+      S.save('pesos',pesos);
+      fb('fb-bio-foto','✓ Salvo! Peso de '+bioIaData.peso+'kg registrado automaticamente.');
+    } else {
+      fb('fb-bio-foto','✓ Salvo!');
+    }
+  } else {
+    fb('fb-bio-foto','✓ Salvo!');
+  }
+  limparBioFoto(); document.getElementById('bio-ia-r').style.display='none';
+  renderBioHist(); renderPesoHist(); renderDash();
 }
 function salvarBioManual() {
   const data=document.getElementById('bio-data-m').value;
@@ -1030,7 +1279,23 @@ function salvarBioManual() {
   Object.entries(map).forEach(([k,id])=>{const v=document.getElementById(id).value;if(v)vals[k]=parseFloat(v);});
   if(!Object.keys(vals).length){fb('fb-bio-m','⚠ Preencha ao menos um campo');return;}
   const arr=[...S.bio,{data,tipo:'manual',valores:vals,obs:document.getElementById('bm-obs').value}].sort((a,b)=>a.data.localeCompare(b.data));
-  S.save('bio',arr); fb('fb-bio-m','✓ Salvo!'); renderBioHist(); renderDash();
+  S.save('bio',arr);
+  // Auto-save weight if provided
+  if(vals.peso) {
+    var pesos=[...S.pesos];
+    var exists=pesos.find(function(p){return p.data===data;});
+    if(!exists) {
+      pesos.push({data:data,peso:vals.peso,origem:'bioimpedancia'});
+      pesos.sort(function(a,b){return a.data.localeCompare(b.data);});
+      S.save('pesos',pesos);
+      fb('fb-bio-m','✓ Salvo! Peso de '+vals.peso+'kg registrado automaticamente.');
+    } else {
+      fb('fb-bio-m','✓ Salvo!');
+    }
+  } else {
+    fb('fb-bio-m','✓ Salvo!');
+  }
+  renderBioHist(); renderPesoHist(); renderDash();
 }
 function renderBioHist() {
   const el=document.getElementById('bio-hist'); const bio=S.bio; const cc=document.getElementById('bio-chart-card');
@@ -1049,9 +1314,9 @@ function renderBioChart() {
   const ctx=document.getElementById('bChart').getContext('2d');
   if(bChart)bChart.destroy();
   bChart=new Chart(ctx,{type:'line',data:{labels,datasets:[
-    {label:'Gordura %',data:bio.map(m=>m.valores?.gordura_pct??null),borderColor:'#ff5a5a',backgroundColor:'transparent',tension:.3,pointRadius:3,borderWidth:2},
-    {label:'Músculo kg',data:bio.map(m=>m.valores?.musculo_kg??null),borderColor:'#2dff8e',backgroundColor:'transparent',tension:.3,pointRadius:3,borderWidth:2},
-    {label:'Água %',data:bio.map(m=>m.valores?.agua_pct??null),borderColor:'#5ab4ff',backgroundColor:'transparent',tension:.3,pointRadius:3,borderWidth:2,borderDash:[4,2]}
+    {label:'Gordura %',data:bio.map(m=>(m.valores&&m.valores.gordura_pct!=null?m.valores.gordura_pct:null)),borderColor:'#ff5a5a',backgroundColor:'transparent',tension:.3,pointRadius:3,borderWidth:2},
+    {label:'Músculo kg',data:bio.map(m=>(m.valores&&m.valores.musculo_kg!=null?m.valores.musculo_kg:null)),borderColor:'#2dff8e',backgroundColor:'transparent',tension:.3,pointRadius:3,borderWidth:2},
+    {label:'Água %',data:bio.map(m=>(m.valores&&m.valores.agua_pct!=null?m.valores.agua_pct:null)),borderColor:'#5ab4ff',backgroundColor:'transparent',tension:.3,pointRadius:3,borderWidth:2,borderDash:[4,2]}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#4d7a61',font:{size:10}}},x:{grid:{display:false},ticks:{color:'#4d7a61',font:{size:10},autoSkip:true,maxRotation:30}}}}});
 }
 
@@ -1070,7 +1335,7 @@ async function lerExIA(){
   try{
     const isImg=exType.startsWith('image');
     const block=isImg?{type:'image',source:{type:'base64',media_type:exType,data:exB64}}:{type:'document',source:{type:'base64',media_type:'application/pdf',data:exB64}};
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:[block,{type:'text',text:'Resultado de exame laboratorial. Extraia todos os valores com nome, resultado, unidade e referência. Liste em português de forma organizada.'}]}]})});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:700,messages:[{role:'user',content:[block,{type:'text',text:'Resultado de exame laboratorial. Extraia todos os valores com nome, resultado, unidade e referência. Liste em português de forma organizada.'}]}]})});
     const d=await res.json();
     exIaRaw=d.content.map(i=>i.text||'').join('');
     document.getElementById('ex-ia-txt').textContent=exIaRaw;
@@ -1103,7 +1368,7 @@ function renderExHist(){
 // ═══ DIA HIST ════════════════════════════════════════════════════
 function renderDiaHist(){
   const el=document.getElementById('dia-hist');const dias=S.dias;
-  const entries=Object.entries(dias).filter(([,v])=>v.treinos?.length||v.sono||v.mood).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,7);
+  const entries=Object.entries(dias).filter(([,v])=>v.treinos&&v.treinos.length||v.sono||v.mood).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,7);
   if(!entries.length){el.innerHTML='<div class="empty"><i class="ti ti-sun"></i>Nenhum registro ainda</div>';return;}
   el.innerHTML=entries.map(([d,v])=>`
     <div class="hi">
@@ -1128,7 +1393,7 @@ function renderDash(){
   const diaHoje=dias[td]||{};
   // metrics
   document.getElementById('d-peso').innerHTML=atual?atual.toFixed(1)+'<span class="mu"> kg</span>':'—<span class="mu"> kg</span>';
-  document.getElementById('d-gord').innerHTML=lastBio?.valores?.gordura_pct!=null?lastBio.valores.gordura_pct.toFixed(1)+'<span class="mu"> %</span>':'—<span class="mu"> %</span>';
+  document.getElementById('d-gord').innerHTML=lastBio&&lastBio.valores&&lastBio.valores.gordura_pct!=null?lastBio.valores.gordura_pct.toFixed(1)+'<span class="mu"> %</span>':'—<span class="mu"> %</span>';
   const aguaHoje=diaHoje.agua||0;
   document.getElementById('d-agua').innerHTML=aguaHoje>=1000?(aguaHoje/1000).toFixed(1)+'<span class="mu"> L</span>':aguaHoje+'<span class="mu"> ml</span>';
   document.getElementById('d-sono').innerHTML=diaHoje.sono?diaHoje.sono.horas+'<span class="mu"> h</span>':'—<span class="mu"> h</span>';
@@ -1157,7 +1422,7 @@ function renderDash(){
   const db=document.getElementById('d-bio');
   const lbl={gordura_pct:'Gordura',musculo_kg:'Músculo',agua_pct:'Água',gordura_visceral:'Visceral',ossea_kg:'Óssea',tmb_kcal:'TMB'};
   const uni={gordura_pct:'%',musculo_kg:'kg',agua_pct:'%',gordura_visceral:'',ossea_kg:'kg',tmb_kcal:'kcal'};
-  if(lastBio?.valores){
+  if(lastBio&&lastBio.valores){
     const chips=Object.entries(lbl).filter(([k])=>lastBio.valores[k]!=null).map(([k,l])=>`<div class="chip"><div class="cl">${l}</div><div class="cv">${lastBio.valores[k]}<span class="cu"> ${uni[k]}</span></div></div>`).join('');
     db.innerHTML=`<div style="font-size:10px;color:var(--text3);margin-bottom:7px">${fmtD(lastBio.data)}</div><div class="cg">${chips}</div>`;
   }else db.innerHTML='<div class="empty"><i class="ti ti-activity"></i>Nenhuma medição ainda</div>';
@@ -1165,9 +1430,9 @@ function renderDash(){
   const pr=S.pratos.filter(r=>r.data===td);
   const dr=document.getElementById('d-refeicoes');
   if(pr.length){
-    const totalCal=pr.reduce((s,r)=>s+(r.ia?.calorias||0),0);
+    const totalCal=pr.reduce((s,r)=>s+(r.ia&&r.ia.calorias||0),0);
     const cores={excelente:'bg',boa:'bg',regular:'by',ruim:'br'};
-    dr.innerHTML=`<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Total: <strong style="color:var(--yellow)">${totalCal} kcal</strong></div>`+pr.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--text2)">${r.tipo}</span><span class="badge ${cores[r.ia?.avaliacao]||'by'}" style="font-size:10px">${r.ia?.calorias||'?'} kcal</span></div>`).join('');
+    dr.innerHTML=`<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Total: <strong style="color:var(--yellow)">${totalCal} kcal</strong></div>`+pr.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--text2)">${r.tipo}</span><span class="badge ${cores[r.ia&&r.ia.avaliacao]||'by'}" style="font-size:10px">${r.ia&&r.ia.calorias||'?'} kcal</span></div>`).join('');
   }else dr.innerHTML='<div class="empty"><i class="ti ti-camera"></i>Nenhuma refeição hoje</div>';
   // hoje resumo
   const dh=document.getElementById('d-hoje');
@@ -1189,24 +1454,28 @@ async function gerarPlano(){
   document.getElementById('btn-gerar').disabled=true;
   document.getElementById('plano-ld').style.display='flex';
   document.getElementById('plano-r').style.display='none';
+  document.getElementById('pl-ex').textContent='';
+  document.getElementById('pl-ali').textContent='';
+  document.getElementById('pl-hid').textContent='';
+  document.getElementById('pl-dic').textContent='';
   const imc=(peso/Math.pow(p.altura/100,2)).toFixed(1);
   const lastBio=S.bio.length?S.bio[S.bio.length-1]:null;
   const lastEx=S.exames.length?S.exames[S.exames.length-1]:null;
   const dias=S.dias; const td=today(); const dh=dias[td]||{};
   const pratosSemana=S.pratos.slice(-10);
   let bioTxt='Sem dados';
-  if(lastBio?.valores){const v=lastBio.valores;const parts=[];if(v.gordura_pct!=null)parts.push(`Gordura:${v.gordura_pct}%`);if(v.musculo_kg!=null)parts.push(`Músculo:${v.musculo_kg}kg`);if(v.agua_pct!=null)parts.push(`Água:${v.agua_pct}%`);if(v.gordura_visceral!=null)parts.push(`Visceral:${v.gordura_visceral}`);if(v.tmb_kcal!=null)parts.push(`TMB:${v.tmb_kcal}kcal`);bioTxt=parts.join(', ');}
+  if(lastBio&&lastBio.valores){const v=lastBio.valores;const parts=[];if(v.gordura_pct!=null)parts.push(`Gordura:${v.gordura_pct}%`);if(v.musculo_kg!=null)parts.push(`Músculo:${v.musculo_kg}kg`);if(v.agua_pct!=null)parts.push(`Água:${v.agua_pct}%`);if(v.gordura_visceral!=null)parts.push(`Visceral:${v.gordura_visceral}`);if(v.tmb_kcal!=null)parts.push(`TMB:${v.tmb_kcal}kcal`);bioTxt=parts.join(', ');}
   let exTxt='Sem exames';
-  if(lastEx)exTxt=lastEx.tipo==='manual'&&lastEx.valores?Object.entries(lastEx.valores).map(([k,v])=>`${k}:${v}`).join(', '):lastEx.raw?lastEx.raw.slice(0,300):'';
+  if(lastEx)exTxt=lastEx.tipo==='manual'&&lastEx.valores?Object.keys(lastEx.valores).map(function(k){return k+':'+lastEx.valores[k];}).join(', '):lastEx.raw?lastEx.raw.slice(0,300):'';
   let pratosTxt='Sem dados';
-  if(pratosSemana.length)pratosTxt=pratosSemana.map(r=>`${r.tipo}:${r.ia?.calorias||'?'}kcal,${r.ia?.avaliacao||'?'}`).join(' | ');
+  if(pratosSemana.length)pratosTxt=pratosSemana.map(function(r){return r.tipo+':'+(r.ia&&r.ia.calorias||'?')+'kcal,'+(r.ia&&r.ia.avaliacao||'?');}).join(' | ');
   let hojeTxt=[];
-  if(dh.sono)hojeTxt.push(`Sono:${dh.sono.horas}h(${dh.sono.qualidade})`);
-  if(dh.mood)hojeTxt.push(`Humor:${dh.mood.label}(energia ${dh.mood.energia}/10)`);
-  if(dh.agua)hojeTxt.push(`Água:${dh.agua}ml`);
-  (dh.treinos||[]).forEach(t=>hojeTxt.push(`Treino:${t.tipo}${t.duracao}min`));
+  if(dh.sono)hojeTxt.push('Sono:'+dh.sono.horas+'h('+dh.sono.qualidade+')');
+  if(dh.mood)hojeTxt.push('Humor:'+dh.mood.label+'(energia '+dh.mood.energia+'/10)');
+  if(dh.agua)hojeTxt.push('Agua:'+dh.agua+'ml');
+  (dh.treinos||[]).forEach(function(t){hojeTxt.push('Treino:'+t.tipo+' '+t.duracao+'min');});
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1400,messages:[{role:'user',content:`Personal trainer e nutricionista. Crie plano personalizado baseado em:
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:2000,messages:[{role:'user',content:`Personal trainer e nutricionista. Crie plano personalizado baseado em:
 Perfil: ${p.sexo||'?'}, ${p.idade||'?'}a, ${p.altura||'?'}cm, ${peso}kg, IMC:${imc}, meta:${p.meta||'?'}kg, atividade:${p.atividade||'sedentário'}, restrições:${p.restricoes||'nenhuma'}
 Bioimpedância: ${bioTxt}
 Exames: ${exTxt}
@@ -1217,14 +1486,44 @@ Meta de água: ${p.agua_meta||2000}ml/dia
 Responda SOMENTE em JSON:
 {"exercicios":"plano semanal detalhado com dias e tipos de treino","alimentacao":"cardápio com café/almoço/jantar/lanches e calorias estimadas","hidratacao_sono":"dicas específicas de hidratação e sono baseadas nos dados","dicas":"4-5 dicas práticas e motivacionais muito personalizadas para esse perfil específico"}`}]})});
     const data=await res.json();
-    const plano=JSON.parse(data.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim());
+    if(data.error) throw new Error('API: '+data.error.message);
+    if(!data.content||!Array.isArray(data.content)) throw new Error('Resposta invalida: '+JSON.stringify(data).slice(0,200));
+    var debugPanel=document.getElementById('debug-panel');
+    if(debugPanel) debugPanel.style.display='none';
+    var rawJson = data.content.map(function(i){return i.text||'';}).join('').replace(/```json|```/g,'').trim();
+    // Try to fix truncated JSON by closing any open strings/objects
+    var plano;
+    try {
+      plano = JSON.parse(rawJson);
+    } catch(parseErr) {
+      // Try to salvage truncated response
+      var truncated = rawJson;
+      // Count open braces and close them
+      var openBraces = (truncated.match(/{/g)||[]).length - (truncated.match(/}/g)||[]).length;
+      // Close any open string first
+      if(truncated.charAt(truncated.length-1) !== '"' && truncated.charAt(truncated.length-1) !== '}') {
+        truncated += '..."';
+      }
+      for(var x=0; x<openBraces; x++) truncated += '}';
+      try {
+        plano = JSON.parse(truncated);
+      } catch(e2) {
+        throw new Error('JSON truncado — aumente max_tokens. Erro: ' + parseErr.message);
+      }
+    }
     document.getElementById('pl-ex').textContent=plano.exercicios;
     document.getElementById('pl-ali').textContent=plano.alimentacao;
     document.getElementById('pl-hid').textContent=plano.hidratacao_sono;
     document.getElementById('pl-dic').textContent=plano.dicas;
     document.getElementById('plano-r').style.display='block';
-  }catch(e){alert('Erro ao gerar plano.');console.error(e);}
-  finally{document.getElementById('btn-gerar').disabled=false;document.getElementById('plano-ld').style.display='none';}
+  }catch(e){
+    console.error('Plano error:',e);
+    alert('Erro ao gerar plano: '+e.message+'. Verifique sua conexão.');
+  }
+  finally{
+    document.getElementById('btn-gerar').disabled=false;
+    document.getElementById('plano-ld').style.display='none';
+  }
 }
 
 
@@ -1278,6 +1577,40 @@ function closeNotif() {
     if(notifQueue.length) processNotifQueue();
     else document.getElementById('notif-dot').classList.remove('show');
   }, 400);
+}
+
+
+function deletarPeso(idx) {
+  if(!confirm('Excluir esse registro de peso?')) return;
+  var arr = [...S.pesos];
+  arr.splice(idx, 1);
+  S.save('pesos', arr);
+  renderPesoHist(); renderDash();
+  fb('fb-peso', '✓ Registro excluído');
+}
+
+function deletarBio(idx) {
+  if(!confirm('Excluir essa medição de bioimpedância?')) return;
+  var arr = [...S.bio];
+  arr.splice(idx, 1);
+  S.save('bio', arr);
+  renderBioHist(); renderDash();
+}
+
+function deletarPrato(idx) {
+  if(!confirm('Excluir essa refeição?')) return;
+  var arr = [...S.pratos];
+  arr.splice(idx, 1);
+  S.save('pratos', arr);
+  renderPratoHist(); renderDash();
+}
+
+function deletarExame(idx) {
+  if(!confirm('Excluir esse exame?')) return;
+  var arr = [...S.exames];
+  arr.splice(idx, 1);
+  S.save('exames', arr);
+  renderExHist(); renderDash();
 }
 
 function calcInsights() {
@@ -1447,6 +1780,8 @@ document.addEventListener('click', function(e) {
 });
 
 function closeNotif(){document.getElementById('notif-banner').classList.remove('show');}
+
+
 function calcInsights(){
   var p=S.perfil,pesos=S.pesos,td=today(),dh=S.dias[td]||{},pratos=S.pratos.filter(function(r){return r.data===td;}),ins=[];
   var metaAgua=parseInt(p.agua_meta||2000),aguaHoje=dh.agua||0,aguaPct=Math.round((aguaHoje/metaAgua)*100);
@@ -1719,6 +2054,29 @@ function compartilharRelatorio() {
   }
 }
 
+
+
+var bioB64s = [];
+
+function handleBioFile(e) {
+  var file = e.target.files[0];
+  if(!file) return;
+  if(bioB64s.length >= 3) { alert('Máximo 3 fotos.'); return; }
+  compressAndAdd(file, function(b64, src) {
+    bioB64s.push(b64);
+    var thumbs = document.getElementById('bio-thumbs');
+    var img = document.createElement('img');
+    img.src = src;
+    img.style.cssText = 'width:76px;height:76px;object-fit:cover;border-radius:8px;border:1px solid rgba(45,255,142,0.3)';
+    thumbs.appendChild(img);
+    var n = bioB64s.length;
+    document.getElementById('bio-count-txt').innerHTML = n + '/3 prints'
+      + (n<3?' &nbsp;<button onclick="addBioFoto()" style="font-size:11px;padding:4px 10px;border-radius:8px;background:rgba(45,255,142,0.1);border:1px solid rgba(45,255,142,0.3);color:#2dff8e;cursor:pointer">+ Mais foto</button>':'');
+    document.getElementById('bio-prev-wrap').style.display = 'block';
+    document.getElementById('bio-upz').style.display = 'none';
+    document.getElementById('bio-ia-r').style.display = 'none';
+  });
+}
 
 </script>
 </body>
